@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,7 +38,11 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
 
-        <div *ngIf="filteredBlocks.length > 0; else noBlocksFound" class="blockchain-container">
+        <div 
+          #blockchainContainer 
+          class="blockchain-container" 
+          (scroll)="onScroll($event)"
+        >
           <div 
             class="blockchain-chain" 
             [@pushAnimation]="filteredBlocks.length"
@@ -116,6 +120,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
       overflow-x: auto;
       overflow-y: hidden;
       white-space: nowrap;
+      max-height: 400px; /* Fixed height to enable scrolling */
     }
 
     .blockchain-chain {
@@ -255,15 +260,21 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
   ]
 })
 export class BlocksComponent implements OnInit, OnDestroy {
-  filteredBlocks: Block[] = [];
+  allBlocks: Block[] = []; // Original list
+  filteredBlocks: Block[] = []; // Display list
   searchHash = '';
+  limit = 10; // Number of blocks to load
   shouldAnimate = false; // Control animation trigger
   private blockchainService = inject(MockBlockchainService);
   private pollSubscription: Subscription | null = null;
+  private isLoading = false; // Prevent multiple requests
+
+  @ViewChild('blockchainContainer') blockchainContainer!: ElementRef;
 
   async ngOnInit() {
-    const blocks = await this.blockchainService.getBlocks() ?? [];
-    this.filteredBlocks = blocks.sort((a, b) => b.height - a.height); // Sort descending for latest first
+    const blocks = await this.blockchainService.getBlocks(this.limit) ?? [];
+    this.allBlocks = blocks.sort((a, b) => b.height - a.height); // Sort descending for latest first
+    this.filteredBlocks = [...this.allBlocks]; // Initialize filteredBlocks with a copy
     this.startPolling();
   }
 
@@ -274,13 +285,13 @@ export class BlocksComponent implements OnInit, OnDestroy {
   }
 
   private startPolling() {
-    this.pollSubscription = interval(30000).subscribe(async () => {
+    this.pollSubscription = interval(15000).subscribe(async () => {
       try {
-        const latestBlocks = await this.blockchainService.getBlocks(); // Fetch all blocks
+        const latestBlocks = await this.blockchainService.getBlocks(3); // Fetch latest blocks
         if (latestBlocks && latestBlocks.length > 0) {
           // Sort received blocks ascending by height to iterate from oldest to newest
           const sortedLatestBlocks = latestBlocks.sort((a, b) => a.height - b.height);
-          const currentLatestHeight = this.filteredBlocks[0]?.height ?? -1;
+          const currentLatestHeight = this.allBlocks[0]?.height ?? -1;
 
           // Check if new blocks will be added
           const hasNewBlocks = sortedLatestBlocks.some(block => block.height > currentLatestHeight);
@@ -288,18 +299,18 @@ export class BlocksComponent implements OnInit, OnDestroy {
             this.shouldAnimate = true; // Enable animation
           }
 
-          // Iterate from the end of sortedLatestBlocks (oldest to newest) and append new blocks
+          // Update allBlocks with new blocks
           for (let i = 0; i < sortedLatestBlocks.length; i++) {
             const block = sortedLatestBlocks[i];
             if (block.height > currentLatestHeight) {
-              this.filteredBlocks.unshift(block);
+              this.allBlocks.unshift(block);
             }
           }
 
-          // Reapply filter if search is active
+          // Reapply filter to update filteredBlocks
           this.filterBlocks();
 
-          // Reset animation flag after a delay to allow animation to complete
+          // Reset animation flag after a delay
           if (hasNewBlocks) {
             setTimeout(() => {
               this.shouldAnimate = false;
@@ -314,13 +325,44 @@ export class BlocksComponent implements OnInit, OnDestroy {
 
   filterBlocks(): void {
     const searchTerm = this.searchHash.trim().toLowerCase();
-    const allBlocks = this.filteredBlocks;
     this.filteredBlocks = searchTerm === ''
-      ? allBlocks
-      : allBlocks.filter(block => block.hash.toLowerCase().includes(searchTerm));
+      ? [...this.allBlocks] // Copy of original list when search is cleared
+      : this.allBlocks.filter(block => block.hash.toLowerCase().includes(searchTerm));
   }
 
   onBlockClick(block: Block): void {
     console.log(`Clicked block: ${block.height}`);
+  }
+
+  async onScroll(event: Event): Promise<void> {
+    if (this.isLoading || this.searchHash) return; // Skip if loading or searching
+
+    const element = this.blockchainContainer.nativeElement;
+    const atEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 50; // 50px buffer
+
+    if (atEnd) {
+      await this.loadNextBlock();
+    }
+  }
+
+  private async loadNextBlock(): Promise<void> {
+    if (this.isLoading) return;
+    this.isLoading = true;
+
+    try {
+      const oldestHeight = this.allBlocks[this.allBlocks.length - 1]?.height ?? 0;
+      const nextHeight = oldestHeight - 1; // Get the previous block
+      if (nextHeight >= 0) { // Ensure we don’t go below genesis block (height 0)
+        const block = await this.blockchainService.getBlock(nextHeight);
+        if (block) {
+          this.allBlocks.push(block); // Append to the end (older block)
+          this.filterBlocks(); // Update filteredBlocks
+        }
+      }
+    } catch (error) {
+      console.error('Error loading next block:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 }

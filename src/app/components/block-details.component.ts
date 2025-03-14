@@ -376,11 +376,6 @@ export class BlockDetailsComponent implements OnInit {
     const height = Number(this.route.snapshot.paramMap.get('height'));
     try {
       this.block = await this.blockchainService.getBlock(height);
-      if (this.block) {
-        console.log('potProof:', this.block.potProof);
-        console.log('potProof.proof:', this.block.potProof.proof);
-        console.log('Is potProof.proof an array?', Array.isArray(this.block.potProof.proof));
-      }
     } catch (error) {
       console.error('Error fetching blocks:', error);
     }

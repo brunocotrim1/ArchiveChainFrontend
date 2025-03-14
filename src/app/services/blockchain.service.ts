@@ -27,7 +27,6 @@ export class MockBlockchainService extends BlockchainService {
 
   async getBlocks(limit?: number): Promise<Block[]> {
     let params = new HttpParams();
-    console.log('limit', limit);
     if (limit !== undefined) {
       params = params.set('limit', limit.toString());
     }
