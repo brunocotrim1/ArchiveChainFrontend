@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { Block } from '../models/interface';
 import { interval, Subscription } from 'rxjs';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, style, transition, animate, query, stagger } from '@angular/animations';
 
 @Component({
   standalone: true,
@@ -39,12 +39,12 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
         </mat-form-field>
 
         <div *ngIf="filteredBlocks.length > 0; else noBlocksFound" class="blockchain-container">
-          <div class="blockchain-chain">
-            <div 
-              *ngFor="let block of filteredBlocks; let i = index" 
-              class="block-wrapper" 
-              [@newBlockAnimation]="i === 0 ? 'enter' : 'stable'"
-            >
+          <div 
+            class="blockchain-chain" 
+            [@pushAnimation]="filteredBlocks.length"
+            [@.disabled]="!shouldAnimate"
+          >
+            <div *ngFor="let block of filteredBlocks; let i = index" class="block-wrapper">
               <div class="block-card" (click)="onBlockClick(block)">
                 <div class="block-content">
                   <h3 class="block-height">Height: {{ block.height }}</h3>
@@ -137,7 +137,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       border-radius: 12px;
       padding: 1rem;
       text-align: center;
-      transition: all 0.3s ease;
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -147,7 +147,6 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 
     .block-card:hover {
       background: #e8f0fe;
-      transform: scale(1.05);
       border-color: #536dfe;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -235,29 +234,22 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     }
   `],
   animations: [
-    trigger('newBlockAnimation', [
-      state('enter', style({
-        opacity: 1,
-        transform: 'translateX(0) scale(1)'
-      })),
-      state('stable', style({
-        opacity: 1,
-        transform: 'translateX(0) scale(1)'
-      })),
-      transition('void => enter', [
-        style({
-          opacity: 0,
-          transform: 'translateX(-100px) scale(0.8)',
-          background: '#c8e6c9' // Light green highlight for new block
-        }),
-        animate('600ms cubic-bezier(0.68, -0.55, 0.27, 1.55)', style({
-          opacity: 1,
-          transform: 'translateX(0) scale(1)',
-          background: '#fafafa' // Back to normal background
-        }))
-      ]),
-      transition('enter => stable', [
-        animate('300ms ease-out')
+    trigger('pushAnimation', [
+      transition(':increment', [
+        query(':enter', [
+          style({
+            opacity: 0,
+            transform: 'translateX(-260px)', // Start off-screen (block width + connector)
+            background: '#c8e6c9' // Light green for new block
+          }),
+          stagger(100, [
+            animate('500ms ease-out', style({
+              opacity: 1,
+              transform: 'translateX(0)',
+              background: '#fafafa' // Back to normal
+            }))
+          ])
+        ], { optional: true })
       ])
     ])
   ]
@@ -265,6 +257,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 export class BlocksComponent implements OnInit, OnDestroy {
   filteredBlocks: Block[] = [];
   searchHash = '';
+  shouldAnimate = false; // Control animation trigger
   private blockchainService = inject(MockBlockchainService);
   private pollSubscription: Subscription | null = null;
 
@@ -289,6 +282,12 @@ export class BlocksComponent implements OnInit, OnDestroy {
           const sortedLatestBlocks = latestBlocks.sort((a, b) => a.height - b.height);
           const currentLatestHeight = this.filteredBlocks[0]?.height ?? -1;
 
+          // Check if new blocks will be added
+          const hasNewBlocks = sortedLatestBlocks.some(block => block.height > currentLatestHeight);
+          if (hasNewBlocks) {
+            this.shouldAnimate = true; // Enable animation
+          }
+
           // Iterate from the end of sortedLatestBlocks (oldest to newest) and append new blocks
           for (let i = 0; i < sortedLatestBlocks.length; i++) {
             const block = sortedLatestBlocks[i];
@@ -299,6 +298,13 @@ export class BlocksComponent implements OnInit, OnDestroy {
 
           // Reapply filter if search is active
           this.filterBlocks();
+
+          // Reset animation flag after a delay to allow animation to complete
+          if (hasNewBlocks) {
+            setTimeout(() => {
+              this.shouldAnimate = false;
+            }, 600); // Slightly longer than animation duration
+          }
         }
       } catch (error) {
         console.error('Error polling latest blocks:', error);
