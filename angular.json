@@ -27,6 +27,7 @@
               }
             ],
             "styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -62,7 +63,8 @@
               "buildTarget": "ArchiveMintFrontend:build:production"
             },
             "development": {
-              "buildTarget": "ArchiveMintFrontend:build:development"
+              "buildTarget": "ArchiveMintFrontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
@@ -85,6 +87,7 @@
               }
             ],
             "styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -92,5 +95,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "8be4069a-8665-431e-b048-985c43162dc4"
   }
 }
