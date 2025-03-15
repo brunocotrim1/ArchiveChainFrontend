@@ -56,9 +56,21 @@ export interface WalletBalance {
   balance: number;
 }
 
+export enum StorageType {
+  AES = 'AES',
+  VDE = 'VDE',
+}
+
 export interface StorageContract {
+  merkleRoot: string;
   fileUrl: string;
-  value: number;
+  fccnSignature?: string;
+  storerSignature?: string;
   storerAddress: string;
-  timestamp: string;
+  timestamp: string; // Changed to string for frontend consistency
+  value: number;    // Changed to number (assuming BigInteger is serialized as a number)
+  proofFrequency: number;
+  windowSize: number;
+  fileLength: number;
+  storageType: StorageType;
 }
