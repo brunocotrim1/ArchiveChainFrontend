@@ -1,3 +1,4 @@
+// transaction-details.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -68,14 +69,13 @@ import { Transaction, Block } from '../models/interface';
                 <div class="detail-group">
                   <div class="detail-item">
                     <span class="label">File URL</span>
-                    <span class="value">{{ transaction.fileProof?.fileUrl || 'N/A' }}</span>
+                    <span class="value clickable" (click)="navigateToFileViewer(transaction.fileProof?.fileUrl)">
+                      {{ transaction.fileProof?.fileUrl || 'N/A' }}
+                    </span>
                   </div>
                   <div class="detail-item">
                     <span class="label">Storage Contract Hash</span>
-                    <span
-                      class="value clickable"
-                      (click)="navigateToStorageContract(transaction.fileProof?.storageContractHash, transaction.fileProof?.fileUrl)"
-                    >
+                    <span class="value clickable" (click)="navigateToStorageContract(transaction.fileProof?.storageContractHash, transaction.fileProof?.fileUrl)">
                       {{ transaction.fileProof?.storageContractHash || 'N/A' }}
                     </span>
                   </div>
@@ -113,7 +113,9 @@ import { Transaction, Block } from '../models/interface';
                 <div class="detail-group">
                   <div class="detail-item">
                     <span class="label">File URL</span>
-                    <span class="value">{{ transaction.contract?.fileUrl || 'N/A' }}</span>
+                    <span class="value clickable" (click)="navigateToFileViewer(transaction.contract?.fileUrl)">
+                      {{ transaction.contract?.fileUrl || 'N/A' }}
+                    </span>
                   </div>
                   <div class="detail-item">
                     <span class="label">Value</span>
@@ -142,13 +144,8 @@ import { Transaction, Block } from '../models/interface';
       </mat-card-content>
 
       <mat-card-actions class="actions" *ngIf="block">
-        <button
-          mat-raised-button
-          class="back-btn"
-          [routerLink]="['/blocks', block.height]"
-        >
-          <mat-icon>arrow_back</mat-icon>
-          Back to Block {{ block.height }}
+        <button mat-raised-button class="back-btn" [routerLink]="['/blocks', block.height]">
+          <mat-icon>arrow_back</mat-icon> Back to Block {{ block.height }}
         </button>
       </mat-card-actions>
     </mat-card>
@@ -156,54 +153,54 @@ import { Transaction, Block } from '../models/interface';
   styles: [`
     :host {
       display: block;
-      padding: 0.75rem; /* Reduced padding for cleaner look */
-      background: #F7FAFC; /* Softer gray background */
+      padding: 0.75rem;
+      background: #F7FAFC;
     }
 
     .transaction-details-card {
-      max-width: 900px; /* Slightly reduced for balance */
-      margin: 1rem auto; /* Adjusted for more whitespace */
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+      max-width: 900px;
+      margin: 1rem auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       border-radius: 8px;
       background: #FFFFFF;
-      border: 1px solid #E2E8F0; /* Softer gray border */
+      border: 1px solid #E2E8F0;
       overflow: hidden;
     }
 
     .header {
-      padding: 0.75rem; /* Reduced padding */
-      background: #F7FAFC; /* Softer gray, no gradient */
+      padding: 0.75rem;
+      background: #F7FAFC;
       border-bottom: 1px solid #E2E8F0;
-      color: #4A4A4A; /* Dark gray */
+      color: #4A4A4A;
     }
 
     mat-card-title {
-      font-size: clamp(1.25rem, 4vw, 1.5rem); /* Slightly reduced for balance */
+      font-size: clamp(1.25rem, 4vw, 1.5rem);
       font-weight: 500;
       margin-bottom: 0.25rem;
       color: #4A4A4A;
     }
 
     mat-card-subtitle {
-      font-size: clamp(0.8rem, 2.5vw, 0.9rem); /* Adjusted for consistency */
-      color: #6B7280; /* Lighter gray */
+      font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+      color: #6B7280;
       font-weight: 400;
     }
 
     .content {
-      padding: 0.75rem; /* Reduced padding */
+      padding: 0.75rem;
     }
 
     .details-container {
       display: flex;
       flex-direction: column;
-      gap: 1rem; /* More whitespace between groups */
+      gap: 1rem;
     }
 
     .detail-group {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Adjusted for balance */
-      gap: 0.75rem; /* Reduced gap */
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 0.75rem;
     }
 
     .detail-item {
@@ -219,43 +216,42 @@ import { Transaction, Block } from '../models/interface';
     .detail-item:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      background: #EDF2F7; /* Softer gray hover */
+      background: #EDF2F7;
     }
 
     .label {
-      font-size: clamp(0.75rem, 2vw, 0.85rem); /* Smaller, cleaner label */
+      font-size: clamp(0.75rem, 2vw, 0.85rem);
       font-weight: 500;
-      color: #2F855A; /* Darker green */
+      color: #2F855A;
       margin-bottom: 0.25rem;
     }
 
     .value {
-      font-size: clamp(0.8rem, 2vw, 0.9rem); /* Slightly reduced for balance */
-      color: #4A4A4A; /* Dark gray */
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      color: #4A4A4A;
       word-break: break-word;
       line-height: 1.4;
     }
 
-    /* Style for clickable Storage Contract Hash */
     .clickable {
       cursor: pointer;
-      color: #2F855A; /* Match the label color for consistency */
+      color: #2F855A;
       text-decoration: underline;
       transition: color 0.3s ease;
     }
 
     .clickable:hover {
-      color: #38A169; /* Lighter green on hover */
+      color: #38A169;
     }
 
     .scrollable-value {
-      max-height: 100px; /* Fixed height for scrollable content */
+      max-height: 100px;
       overflow-y: auto;
       padding: 0.25rem;
-      font-size: clamp(0.7rem, 1.5vw, 0.8rem); /* Smaller text for long content */
+      font-size: clamp(0.7rem, 1.5vw, 0.8rem);
       color: #4A4A4A;
-      scrollbar-width: thin; /* Firefox */
-      scrollbar-color: #2F855A #F7FAFC; /* Darker green track */
+      scrollbar-width: thin;
+      scrollbar-color: #2F855A #F7FAFC;
     }
 
     .scrollable-value::-webkit-scrollbar {
@@ -276,15 +272,15 @@ import { Transaction, Block } from '../models/interface';
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px; /* Reduced gap */
-      padding: 0.75rem; /* Reduced padding */
+      gap: 8px;
+      padding: 0.75rem;
       background: #F7FAFC;
       border-radius: 6px;
       color: #6B7280;
     }
 
     .not-found mat-icon {
-      color: #F6AD55; /* Softer orange */
+      color: #F6AD55;
       font-size: 1.25rem;
       height: 1.25rem;
       width: 1.25rem;
@@ -292,12 +288,12 @@ import { Transaction, Block } from '../models/interface';
 
     .not-found p {
       margin: 0;
-      font-size: clamp(0.85rem, 2.5vw, 0.95rem); /* Adjusted for consistency */
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
       color: #6B7280;
     }
 
     .actions {
-      padding: 0.75rem; /* Reduced padding */
+      padding: 0.75rem;
       background: #F7FAFC;
       border-top: 1px solid #E2E8F0;
       display: flex;
@@ -311,14 +307,14 @@ import { Transaction, Block } from '../models/interface';
       padding: 0.3rem 0.5rem;
       font-size: clamp(0.75rem, 2vw, 0.85rem);
       font-weight: 500;
-      background: #2F855A; /* Darker green */
+      background: #2F855A;
       color: #FFFFFF;
       border-radius: 4px;
       transition: all 0.3s ease;
     }
 
     .back-btn:hover {
-      background: #38A169; /* Lighter darker green */
+      background: #38A169;
       transform: scale(1.05);
     }
 
@@ -397,7 +393,6 @@ export class TransactionDetailsComponent implements OnInit {
 
   async ngOnInit() {
     const txId = this.route.snapshot.paramMap.get('id');
-
     if (this.block) {
       this.transaction = this.block.transactions.find(tx => tx.transactionId === txId) || null;
       console.log('Transaction found in block:', this.transaction);
@@ -408,10 +403,8 @@ export class TransactionDetailsComponent implements OnInit {
         this.transaction = this.block.transactions.find(tx => tx.transactionId === txId) || null;
       }
     }
-
   }
 
-  // Navigate to StorageContractDetailsComponent with contractHash and fileUrl as query parameters
   navigateToStorageContract(contractHash: string | undefined, fileUrl: string | undefined) {
     if (contractHash && fileUrl) {
       this.router.navigate(['/storageContractDetails'], {
@@ -423,5 +416,19 @@ export class TransactionDetailsComponent implements OnInit {
     } else {
       console.warn('Cannot navigate: Missing contractHash or fileUrl', { contractHash, fileUrl });
     }
+  }
+
+  navigateToFileViewer(fileUrl: string | undefined) {
+    if (fileUrl) {
+      const filename = this.extractFilename(fileUrl);
+      this.router.navigate(['/file-viewer'], {
+        queryParams: { filename }
+      });
+    }
+  }
+
+  private extractFilename(fileUrl: string): string {
+    const parts = fileUrl.split('/');
+    return parts[parts.length - 1] || fileUrl;
   }
 }

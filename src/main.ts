@@ -12,7 +12,7 @@ import { SendTransactionComponent } from './app/components/send-transaction.comp
 import { MockBlockchainService } from './app/services/blockchain.service';
 import { provideHttpClient } from '@angular/common/http';
 import { StorageContractDetailsComponent } from './app/components/storage-contract-details.component';
-
+import { FileViewerComponent } from './app/components/file-viewer.component';
 const routes: Routes = [
   { path: '', redirectTo: '/blocks', pathMatch: 'full' },
   { path: 'blocks', component: BlocksComponent },
@@ -22,7 +22,8 @@ const routes: Routes = [
   { path: 'storedFiles', component: StoredFilesComponent },
   { path: 'storageContracts', component: StorageContractsComponent },
   { path: 'sendTransaction', component: SendTransactionComponent },
-  { path: 'storageContractDetails', component: StorageContractDetailsComponent }
+  { path: 'storageContractDetails', component: StorageContractDetailsComponent },
+  { path: 'file-viewer', component: FileViewerComponent }
 ];
 
 bootstrapApplication(AppComponent, {

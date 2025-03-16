@@ -1,3 +1,4 @@
+// storage-contract-details.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -23,7 +24,12 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
     <mat-card class="contract-details-card">
       <mat-card-header class="header">
         <mat-card-title>Storage Contract Details</mat-card-title>
-        <mat-card-subtitle>File URL: {{ storageContract?.fileUrl || 'N/A' }}</mat-card-subtitle>
+        <mat-card-subtitle>
+          File URL: 
+          <span class="clickable" (click)="navigateToFileViewer(storageContract?.fileUrl)">
+            {{ storageContract?.fileUrl || 'N/A' }}
+          </span>
+        </mat-card-subtitle>
       </mat-card-header>
 
       <mat-card-content class="content">
@@ -32,7 +38,9 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
             <div class="detail-group">
               <div class="detail-item">
                 <span class="label">File URL</span>
-                <span class="value scrollable">{{ storageContract.fileUrl }}</span>
+                <span class="value scrollable clickable" (click)="navigateToFileViewer(storageContract.fileUrl)">
+                  {{ storageContract.fileUrl }}
+                </span>
               </div>
               <div class="detail-item">
                 <span class="label">Storer Address</span>
@@ -129,7 +137,7 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
     :host {
       display: block;
       padding: 0.75rem;
-      background: #F7FAFC; /* Softer gray background */
+      background: #F7FAFC;
     }
 
     .contract-details-card {
@@ -138,7 +146,7 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       border-radius: 8px;
       background: #FFFFFF;
-      border: 1px solid #E2E8F0; /* Softer gray border */
+      border: 1px solid #E2E8F0;
       overflow: hidden;
     }
 
@@ -208,7 +216,6 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
       line-height: 1.4;
     }
 
-    /* Add scrollable class for horizontally scrollable values */
     .scrollable {
       overflow-x: auto;
       white-space: nowrap;
@@ -229,6 +236,17 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
     .scrollable::-webkit-scrollbar-thumb {
       background: #2F855A;
       border-radius: 3px;
+    }
+
+    .clickable {
+      cursor: pointer;
+      color: #2F855A;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }
+
+    .clickable:hover {
+      color: #38A169;
     }
 
     .divider {
@@ -287,19 +305,19 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
     }
 
     .proving-window-item.pending {
-      background: #FEF3C7; /* Soft yellow for PENDING */
+      background: #FEF3C7;
     }
 
     .proving-window-item.proving {
-      background: #DBEAFE; /* Soft blue for PROVING */
+      background: #DBEAFE;
     }
 
     .proving-window-item.proved {
-      background: #DCFCE7; /* Soft green for PROVED */
+      background: #DCFCE7;
     }
 
     .proving-window-item.failed {
-      background: #FEE2E2; /* Soft red for FAILED */
+      background: #FEE2E2;
     }
 
     .window-detail {
@@ -451,7 +469,6 @@ export class StorageContractDetailsComponent implements OnInit {
   private blockchainService = inject(MockBlockchainService);
 
   async ngOnInit() {
-    // Retrieve contractHash and fileUrl as query parameters
     const contractHash = this.route.snapshot.queryParamMap.get('contractHash');
     const fileUrl = this.route.snapshot.queryParamMap.get('fileUrl');
     if (contractHash && fileUrl) {
@@ -482,18 +499,27 @@ export class StorageContractDetailsComponent implements OnInit {
 
   formatFileLength(bytes: number): string {
     if (bytes <= 0) return '0 Bytes';
-    
     const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     let value = bytes;
     let unitIndex = 0;
-
     while (value >= 1000 && unitIndex < units.length - 1) {
       value /= 1000;
       unitIndex++;
     }
+    return unitIndex === 0 ? `${Math.round(value)} ${units[unitIndex]}` : `${value.toFixed(2)} ${units[unitIndex]}`;
+  }
 
-    return unitIndex === 0 
-      ? `${Math.round(value)} ${units[unitIndex]}`
-      : `${value.toFixed(2)} ${units[unitIndex]}`;
+  navigateToFileViewer(fileUrl: string | undefined) {
+    if (fileUrl) {
+      const filename = this.extractFilename(fileUrl);
+      this.router.navigate(['/file-viewer'], {
+        queryParams: { filename }
+      });
+    }
+  }
+
+  private extractFilename(fileUrl: string): string {
+    const parts = fileUrl.split('/');
+    return parts[parts.length - 1] || fileUrl;
   }
 }

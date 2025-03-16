@@ -1,3 +1,4 @@
+// storage-contracts.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -38,7 +39,9 @@ import { StorageContract } from '../models/interface';
               <ng-container matColumnDef="fileUrl">
                 <mat-header-cell *matHeaderCellDef>File URL</mat-header-cell>
                 <mat-cell *matCellDef="let contract" [matTooltip]="contract.fileUrl">
-                  <div class="scrollable-text">{{ contract.fileUrl }}</div>
+                  <div class="scrollable-text clickable" (click)="navigateToFileViewer($event, contract.fileUrl)">
+                    {{ contract.fileUrl }}
+                  </div>
                 </mat-cell>
               </ng-container>
               <ng-container matColumnDef="storerAddress">
@@ -101,7 +104,7 @@ import { StorageContract } from '../models/interface';
   styles: [`
     :host {
       display: block;
-      background: #F7FAFC; /* Softer gray background */
+      background: #F7FAFC;
       min-height: 100vh;
       padding: 0.75rem;
       box-sizing: border-box;
@@ -112,14 +115,15 @@ import { StorageContract } from '../models/interface';
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1#pragma once
+rem;
     }
 
     .contracts-card {
       background: #FFFFFF;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      border: 1px solid #E2E8F0; /* Softer gray border */
+      border: 1px solid #E2E8F0;
       overflow: hidden;
       width: 100%;
       box-sizing: border-box;
@@ -175,7 +179,7 @@ import { StorageContract } from '../models/interface';
     }
 
     mat-header-cell, mat-cell {
-      color: #4A4A4A; /* Dark gray */
+      color: #4A4A4A;
       font-size: clamp(0.75rem, 2vw, 0.85rem);
       padding: 0.75rem 0.5rem;
       border-bottom: 1px solid #E2E8F0;
@@ -183,7 +187,7 @@ import { StorageContract } from '../models/interface';
 
     mat-header-cell {
       font-weight: 600;
-      color: #2F855A; /* Darker green */
+      color: #2F855A;
       background: #F7FAFC;
       white-space: nowrap;
     }
@@ -215,8 +219,19 @@ import { StorageContract } from '../models/interface';
       border-radius: 3px;
     }
 
+    .clickable {
+      cursor: pointer;
+      color: #2F855A;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }
+
+    .clickable:hover {
+      color: #38A169;
+    }
+
     mat-row:hover {
-      background: #EDF2F7; /* Softer gray hover */
+      background: #EDF2F7;
       cursor: pointer;
     }
 
@@ -226,15 +241,15 @@ import { StorageContract } from '../models/interface';
     }
 
     .load-more button {
-      background-color: #2F855A; /* Darker green */
+      background-color: #2F855A;
       color: #FFFFFF;
       border-radius: 4px;
       transition: all 0.3s ease;
     }
 
     .load-more button:hover {
-      background-color: #38A169; /* Lighter darker green */
-      transform: scale(1.05);
+      background-color: #38A169;
+      transform: scale/**************************************************************************************/1.05);
     }
 
     .no-contracts {
@@ -252,7 +267,7 @@ import { StorageContract } from '../models/interface';
 
     .no-contracts mat-icon {
       margin-right: 0.5rem;
-      color: #F6AD55; /* Softer orange */
+      color: #F6AD55;
       font-size: 1.25rem;
       height: 1.25rem;
       width: 1.25rem;
@@ -333,50 +348,53 @@ export class StorageContractsComponent implements OnInit {
     }
   }
 
-navigateToContractDetails(contract: StorageContract) {
-  // Use contract.hash and contract.fileUrl as query parameters
-  if (contract.hash && contract.fileUrl) {
-    console.log('Navigating to contract details:', contract.hash, contract.fileUrl);
-    this.router.navigate(['/storageContractDetails'], {
-      queryParams: {
-        contractHash: this.convertBase64ToHex(contract.hash),
-        fileUrl: contract.fileUrl
-      }
-    });
-  } else {
-    console.warn('Invalid contract data: hash or fileUrl is missing', contract);
-  }
-}
-private convertBase64ToHex(base64Str: string): string {
-  try {
-    // Decode Base64 to bytes
-    const bytes = atob(base64Str); // Decode Base64 string to binary
-    // Convert each byte to hex
-    let hex = '';
-    for (let i = 0; i < bytes.length; i++) {
-      hex += ('0' + bytes.charCodeAt(i).toString(16)).slice(-2);
+  navigateToContractDetails(contract: StorageContract) {
+    if (contract.hash && contract.fileUrl) {
+      this.router.navigate(['/storageContractDetails'], {
+        queryParams: {
+          contractHash: this.convertBase64ToHex(contract.hash),
+          fileUrl: contract.fileUrl
+        }
+      });
     }
-    return hex.toLowerCase(); // Return hex string in lowercase for consistency
-  } catch (error) {
-    console.warn('Invalid Base64 string, treating as hex:', base64Str, error);
-    return base64Str; // Return original string if decoding fails (assume it's already hex)
   }
-}
+
+  navigateToFileViewer(event: Event, fileUrl: string) {
+    event.stopPropagation(); // Prevent row click from triggering
+    const filename = this.extractFilename(fileUrl);
+    this.router.navigate(['/file-viewer'], {
+      queryParams: { filename }
+    });
+  }
+
+  private convertBase64ToHex(base64Str: string): string {
+    try {
+      const bytes = atob(base64Str);
+      let hex = '';
+      for (let i = 0; i < bytes.length; i++) {
+        hex += ('0' + bytes.charCodeAt(i).toString(16)).slice(-2);
+      }
+      return hex.toLowerCase();
+    } catch (error) {
+      console.warn('Invalid Base64 string, treating as hex:', base64Str, error);
+      return base64Str;
+    }
+  }
+
+  private extractFilename(fileUrl: string): string {
+    const parts = fileUrl.split('/');
+    return parts[parts.length - 1] || fileUrl;
+  }
 
   formatFileLength(bytes: number): string {
     if (bytes <= 0) return '0 Bytes';
-    
     const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     let value = bytes;
     let unitIndex = 0;
-
     while (value >= 1000 && unitIndex < units.length - 1) {
       value /= 1000;
       unitIndex++;
     }
-
-    return unitIndex === 0 
-      ? `${Math.round(value)} ${units[unitIndex]}`
-      : `${value.toFixed(2)} ${units[unitIndex]}`;
+    return unitIndex === 0 ? `${Math.round(value)} ${units[unitIndex]}` : `${value.toFixed(2)} ${units[unitIndex]}`;
   }
 }
