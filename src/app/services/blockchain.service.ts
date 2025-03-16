@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Block, Transaction, WalletBalance, StorageContract } from '../models/interface';
+import { Block, Transaction, WalletBalance, StorageContract, FileProvingWindow } from '../models/interface';
 import { environment } from '../environments/enviroment';
 
 @Injectable({
@@ -19,6 +19,8 @@ export abstract class BlockchainService {
   abstract getArchivedStorage(): Promise<string>;
   abstract getTotalAmountOfContracts(): Promise<string>;
   abstract getTotalAmountOfCoins(): Promise<string>;
+  abstract getStorageContract(contractHash: string, fileUrl: string): Promise<StorageContract | null>;
+  abstract getContractFileProvingWindows(contractHash: string): Promise<FileProvingWindow[]>;
 }
 
 @Injectable({
@@ -77,11 +79,12 @@ export class MockBlockchainService extends BlockchainService {
   }
 
   async getStorageContractsChunk(fileName: string, offset: number, limit: number): Promise<StorageContract[]> {
-    let params = new HttpParams()
-      .set('fileName', fileName)
-      .set('offset', offset.toString())
-      .set('limit', limit.toString());
     try {
+      let params = new HttpParams()
+        .set('fileName', encodeURIComponent(fileName)) // Encode fileName to handle special characters
+        .set('offset', offset.toString())
+        .set('limit', limit.toString());
+  
       const response = await this.http.get<StorageContract[]>(`${this.backendUrl}/explorer/storageContractsChunk`, { params }).toPromise();
       return response ?? [];
     } catch (error) {
@@ -170,6 +173,30 @@ export class MockBlockchainService extends BlockchainService {
     } catch (error) {
       console.error('Error fetching total amount of coins:', error);
       return '0';
+    }
+  }
+
+  async getStorageContract(contractHash: string, fileUrl: string): Promise<StorageContract | null> {
+    try {
+      let params = new HttpParams()
+        .set('contractHash', contractHash)
+        .set('fileUrl', fileUrl);
+      const response = await this.http.get<StorageContract>(`${this.backendUrl}/explorer/getStorageContract`, { params }).toPromise();
+      return response ?? null;
+    } catch (error) {
+      console.error('Error fetching storage contract:', error);
+      return null;
+    }
+  }
+
+  async getContractFileProvingWindows(contractHash: string): Promise<FileProvingWindow[]> {
+    try {
+      let params = new HttpParams().set('contractHash', contractHash);
+      const response = await this.http.get<FileProvingWindow[]>(`${this.backendUrl}/explorer/getContractFileProvingWindows`, { params }).toPromise();
+      return response ?? [];
+    } catch (error) {
+      console.error('Error fetching file proving windows:', error);
+      return [];
     }
   }
 }

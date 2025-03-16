@@ -151,7 +151,7 @@ import { Block, Transaction } from '../models/interface';
 
       <!-- Back to Blocks Button (Always Visible) -->
       <mat-card-actions class="actions">
-        <button mat-raised-button color="warn" class="back-btn" [routerLink]="['/blocks']">
+        <button mat-raised-button class="back-btn" [routerLink]="['/blocks']">
           <mat-icon>arrow_back</mat-icon> Back to Blocks
         </button>
       </mat-card-actions>
@@ -160,46 +160,49 @@ import { Block, Transaction } from '../models/interface';
   styles: [`
     :host {
       display: block;
-      padding: 1.5rem;
+      padding: 1rem;
+      background: #F7FAFC; /* Softer gray background */
     }
 
     .block-details-card {
       max-width: 1000px;
-      margin: 0 auto 2rem;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-      border-radius: 16px;
-      background: #ffffff;
+      margin: 1.5rem auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0; /* Softer gray border */
       overflow: hidden;
     }
 
     .header {
-      padding: 1.5rem;
-      background: linear-gradient(90deg, #3f51b5 0%, #5c6bc0 100%);
-      color: white;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
+      padding: 1rem;
+      background: #F7FAFC; /* Softer gray header background */
+      border-bottom: 1px solid #E2E8F0;
+      color: #4A4A4A; /* Dark gray for primary text */
     }
 
     mat-card-title {
-      font-size: 1.75rem;
-      font-weight: 600;
+      font-size: clamp(1.25rem, 4vw, 1.75rem);
+      font-weight: 500;
       margin-bottom: 0.25rem;
+      color: #4A4A4A; /* Dark gray for titles */
     }
 
     mat-card-subtitle {
-      font-size: 1rem;
-      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(0.85rem, 3vw, 1rem);
+      color: #6B7280; /* Lighter gray for secondary text */
+      font-weight: 400;
     }
 
     .content {
-      padding: 2rem;
+      padding: 1rem;
     }
 
     .details-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem 2rem;
-      margin-bottom: 2rem;
+      gap: 1rem 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .detail-item {
@@ -208,89 +211,98 @@ import { Block, Transaction } from '../models/interface';
     }
 
     .label {
-      font-size: 0.9rem;
+      font-size: clamp(0.8rem, 2.5vw, 0.9rem);
       font-weight: 500;
-      color: #3f51b5;
+      color: #2F855A; /* Darker green for labels */
       margin-bottom: 0.25rem;
     }
 
     .value {
-      font-size: 1rem;
-      color: #424242;
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+      color: #4A4A4A; /* Dark gray for values */
       word-break: break-word;
     }
 
     .proof-list {
-      font-size: 0.9rem;
+      font-size: clamp(0.75rem, 2vw, 0.85rem);
       line-height: 1.4;
+      color: #4A4A4A; /* Dark gray for proof list */
     }
 
     .proof-panel {
-      margin-bottom: 1.5rem;
-      border-radius: 12px;
+      margin-bottom: 1rem;
+      border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      background: #F7FAFC; /* Softer gray background */
     }
 
     .proof-panel mat-panel-title {
-      font-size: 1.1rem;
-      color: #3f51b5;
+      font-size: clamp(1rem, 3.5vw, 1.25rem);
+      color: #2F855A; /* Darker green for panel titles */
       font-weight: 500;
     }
 
     .proof-content {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem 2rem;
-      padding: 1rem;
+      gap: 0.75rem 1.5rem;
+      padding: 0.75rem;
     }
 
     .divider {
-      margin: 2rem 0;
-      background-color: #eceff1;
+      margin: 1.5rem 0;
+      background-color: #E2E8F0; /* Softer gray divider */
     }
 
     .transactions-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #3f51b5;
-      margin: 0 0 1.5rem 0;
+      font-size: clamp(1rem, 3.5vw, 1.25rem);
+      font-weight: 500;
+      color: #2F855A; /* Darker green for titles */
+      margin: 0 0 0.75rem 0;
     }
 
     .transactions-container {
-      max-height: 500px;
+      max-height: 400px;
       overflow-y: auto;
       padding-right: 0.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: #2F855A #F7FAFC; /* Darker green scrollbar */
     }
+
+    .transactions-container::-webkit-scrollbar { width: 6px; }
+    .transactions-container::-webkit-scrollbar-track { background: #F7FAFC; border-radius: 3px; }
+    .transactions-container::-webkit-scrollbar-thumb { background: #2F855A; border-radius: 3px; }
 
     .transactions-list {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.5rem;
     }
 
     .transaction-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.25rem;
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
+      padding: 0.5rem;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0; /* Softer gray border */
+      border-radius: 4px;
       transition: all 0.3s ease;
       cursor: pointer;
     }
 
     .transaction-item:hover {
-      background: #e8f0fe;
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border-color: #536dfe;
+      background: #EDF2F7; /* Slightly darker gray for hover */
+      transform: translateX(3px);
+      border-color: #2F855A; /* Darker green border on hover */
     }
 
     .arrow-icon {
-      color: #3f51b5;
-      font-size: 1.5rem;
-      transition: transform 0.2s ease;
+      color: #2F855A; /* Darker green for icons */
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      transition: transform 0.3s ease;
     }
 
     .transaction-item:hover .arrow-icon {
@@ -301,68 +313,132 @@ import { Block, Transaction } from '../models/interface';
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2.5rem;
-      color: #757575;
-      background: #f5f5f5;
-      border-radius: 12px;
-      margin-top: 1rem;
+      padding: 1rem;
+      color: #6B7280; /* Lighter gray for subtle text */
+      background: #F7FAFC; /* Softer gray background */
+      border-radius: 6px;
+      margin-top: 0.5rem;
     }
 
     .no-transactions mat-icon {
-      margin-right: 0.75rem;
-      color: #ff9800;
-      font-size: 1.5rem;
-      height: 1.5rem;
-      width: 1.5rem;
+      margin-right: 0.5rem;
+      color: #F6AD55; /* Softer orange for warning icons */
+      font-size: 1.25rem;
+      height: 1.25rem;
+      width: 1.25rem;
     }
 
     .no-transactions p {
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      margin: 0;
+      color: #6B7280; /* Lighter gray for text */
     }
 
     .actions {
-      padding: 1.5rem 2rem;
+      padding: 1rem;
       display: flex;
       justify-content: flex-end;
-      background: #fafafa;
-      border-top: 1px solid #eceff1;
+      background: #F7FAFC; /* Softer gray background */
+      border-top: 1px solid #E2E8F0; /* Softer gray border */
     }
 
     .back-btn {
-      padding: 0.5rem 1.5rem;
-      font-size: 1rem;
-      transition: transform 0.2s ease, background-color 0.2s ease;
+      padding: 0.3rem 0.5rem;
+      font-size: clamp(0.75rem, 2vw, 0.85rem);
+      background: #2F855A; /* Darker green for buttons */
+      color: #FFFFFF;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
     }
 
     .back-btn:hover {
-      transform: translateY(-2px);
-      background-color: #d32f2f;
+      background: #38A169; /* Slightly lighter green for hover */
+      transform: scale(1.05);
     }
 
     .back-btn mat-icon {
-      margin-right: 0.5rem;
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      color: #FFFFFF;
     }
 
     .not-found {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2.5rem;
-      color: #757575;
-      background: #f5f5f5;
-      border-radius: 12px;
+      padding: 1rem;
+      color: #6B7280; /* Lighter gray for text */
+      background: #F7FAFC; /* Softer gray background */
+      border-radius: 6px;
     }
 
     .not-found mat-icon {
-      margin-right: 0.75rem;
-      color: #f44336;
-      font-size: 1.5rem;
-      height: 1.5rem;
-      width: 1.5rem;
+      margin-right: 0.5rem;
+      color: #F6AD55; /* Softer orange for warning icons */
+      font-size: 1.25rem;
+      height: 1.25rem;
+      width: 1.25rem;
     }
 
     .not-found p {
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      margin: 0;
+      color: #6B7280; /* Lighter gray for text */
+    }
+
+    @media (max-width: 768px) {
+      :host {
+        padding: 0.75rem;
+      }
+
+      .block-details-card {
+        margin: 1rem auto;
+      }
+
+      .header, .content, .actions {
+        padding: 0.75rem;
+      }
+
+      .details-grid, .proof-content {
+        grid-template-columns: 1fr;
+        gap: 0.75rem 1rem;
+      }
+
+      .transactions-title, mat-panel-title {
+        font-size: clamp(0.9rem, 3vw, 1rem);
+      }
+    }
+
+    @media (max-width: 480px) {
+      :host {
+        padding: 0.5rem;
+      }
+
+      .block-details-card {
+        margin: 0.5rem auto;
+      }
+
+      .header, .content, .actions {
+        padding: 0.5rem;
+      }
+
+      .label, .value {
+        font-size: clamp(0.7rem, 2vw, 0.8rem);
+      }
+
+      .back-btn {
+        font-size: clamp(0.65rem, 2vw, 0.75rem);
+      }
+
+      .back-btn mat-icon {
+        font-size: 0.9rem;
+        height: 0.9rem;
+        width: 0.9rem;
+      }
     }
   `]
 })
@@ -384,10 +460,9 @@ export class BlockDetailsComponent implements OnInit {
   navigateToTransaction(tx: Transaction, height: number): void {
     const txId = tx.transactionId;
     const blockHeight = height;
-    console
     if (txId) {
       this.router.navigate(['/transactions', tx.transactionId], {
-        state: { block: this.block } // Send the block object in the state
+        state: { block: this.block }
       });
     }
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { StorageContract } from '../models/interface';
 
@@ -79,10 +80,10 @@ import { StorageContract } from '../models/interface';
                 <mat-cell *matCellDef="let contract">{{ contract.storageType }}</mat-cell>
               </ng-container>
               <mat-header-row *matHeaderRowDef="contractColumns"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: contractColumns;"></mat-row>
+              <mat-row *matRowDef="let row; columns: contractColumns;" (click)="navigateToContractDetails(row)"></mat-row>
             </mat-table>
             <div class="load-more" *ngIf="hasMore">
-              <button mat-raised-button color="primary" (click)="loadMore()" [disabled]="isLoading">
+              <button mat-raised-button (click)="loadMore()" [disabled]="isLoading">
                 {{ isLoading ? 'Loading...' : 'Load More' }}
               </button>
             </div>
@@ -100,10 +101,9 @@ import { StorageContract } from '../models/interface';
   styles: [`
     :host {
       display: block;
-      font-family: 'Roboto', sans-serif;
-      background: #F5F6F5;
+      background: #F7FAFC; /* Softer gray background */
       min-height: 100vh;
-      padding: 1rem;
+      padding: 0.75rem;
       box-sizing: border-box;
     }
 
@@ -119,33 +119,34 @@ import { StorageContract } from '../models/interface';
       background: #FFFFFF;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      border: 1px solid #E0E0E0;
+      border: 1px solid #E2E8F0; /* Softer gray border */
       overflow: hidden;
       width: 100%;
       box-sizing: border-box;
     }
 
     .header {
-      padding: 1rem;
-      background: #FAFAFA;
-      border-bottom: 1px solid #E0E0E0;
-      color: #333333;
+      padding: 0.75rem;
+      background: #F7FAFC;
+      border-bottom: 1px solid #E2E8F0;
+      color: #4A4A4A;
     }
 
     mat-card-title {
-      font-size: clamp(1.25rem, 4vw, 1.75rem);
+      font-size: clamp(1.25rem, 4vw, 1.5rem);
       font-weight: 500;
       margin-bottom: 0.25rem;
+      color: #4A4A4A;
     }
 
     mat-card-subtitle {
-      font-size: clamp(0.85rem, 3vw, 1rem);
-      color: #757575;
+      font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+      color: #6B7280;
       font-weight: 400;
     }
 
     .content-wrapper {
-      padding: 1rem;
+      padding: 0.75rem;
       background: #FFFFFF;
       position: relative;
     }
@@ -160,10 +161,10 @@ import { StorageContract } from '../models/interface';
     .contracts-list {
       width: 100%;
       overflow-x: auto;
-      background: #FAFAFA;
+      background: #F7FAFC;
       border-radius: 6px;
-      border: 1px solid #E0E0E0;
-      padding: 1rem;
+      border: 1px solid #E2E8F0;
+      padding: 0.75rem;
       box-sizing: border-box;
     }
 
@@ -174,16 +175,16 @@ import { StorageContract } from '../models/interface';
     }
 
     mat-header-cell, mat-cell {
-      color: #424242;
+      color: #4A4A4A; /* Dark gray */
       font-size: clamp(0.75rem, 2vw, 0.85rem);
       padding: 0.75rem 0.5rem;
-      border-bottom: 1px solid #E0E0E0;
+      border-bottom: 1px solid #E2E8F0;
     }
 
     mat-header-cell {
       font-weight: 600;
-      color: #66BB6A;
-      background: #F5F5F5;
+      color: #2F855A; /* Darker green */
+      background: #F7FAFC;
       white-space: nowrap;
     }
 
@@ -197,7 +198,7 @@ import { StorageContract } from '../models/interface';
       white-space: nowrap;
       width: 100%;
       scrollbar-width: thin;
-      scrollbar-color: #66BB6A #F5F5F5;
+      scrollbar-color: #2F855A #F7FAFC;
     }
 
     .scrollable-text::-webkit-scrollbar {
@@ -205,17 +206,17 @@ import { StorageContract } from '../models/interface';
     }
 
     .scrollable-text::-webkit-scrollbar-track {
-      background: #F5F5F5;
+      background: #F7FAFC;
       border-radius: 3px;
     }
 
     .scrollable-text::-webkit-scrollbar-thumb {
-      background: #66BB6A;
+      background: #2F855A;
       border-radius: 3px;
     }
 
     mat-row:hover {
-      background: #F5F5F5;
+      background: #EDF2F7; /* Softer gray hover */
       cursor: pointer;
     }
 
@@ -225,21 +226,24 @@ import { StorageContract } from '../models/interface';
     }
 
     .load-more button {
-      background-color: #66BB6A;
+      background-color: #2F855A; /* Darker green */
       color: #FFFFFF;
+      border-radius: 4px;
+      transition: all 0.3s ease;
     }
 
     .load-more button:hover {
-      background-color: #AED581;
+      background-color: #38A169; /* Lighter darker green */
+      transform: scale(1.05);
     }
 
     .no-contracts {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
-      color: #757575;
-      background: #F5F5F5;
+      padding: 0.75rem;
+      color: #6B7280;
+      background: #F7FAFC;
       border-radius: 6px;
       margin: 0.5rem 0;
       width: 100%;
@@ -248,22 +252,23 @@ import { StorageContract } from '../models/interface';
 
     .no-contracts mat-icon {
       margin-right: 0.5rem;
-      color: #FFB300;
+      color: #F6AD55; /* Softer orange */
       font-size: 1.25rem;
       height: 1.25rem;
       width: 1.25rem;
     }
 
     .no-contracts p {
-      font-size: clamp(0.9rem, 3vw, 1rem);
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
       margin: 0;
+      color: #6B7280;
     }
 
     @media (min-width: 768px) {
-      :host { padding: 2rem; }
+      :host { padding: 1rem; }
       .contracts-container { max-width: 1400px; }
-      .content-wrapper { padding: 1.5rem 2rem; }
-      .contracts-list { padding: 1.5rem; }
+      .content-wrapper { padding: 1rem; }
+      .contracts-list { padding: 1rem; }
       mat-header-cell, mat-cell { font-size: 0.9rem; }
       mat-cell { max-width: 250px; }
     }
@@ -299,6 +304,7 @@ export class StorageContractsComponent implements OnInit {
   isLoading = false;
   hasMore = true;
   private blockchainService = inject(MockBlockchainService);
+  private router = inject(Router);
   private pageSize = 10;
   private offset = 0;
 
@@ -312,7 +318,7 @@ export class StorageContractsComponent implements OnInit {
       const newContracts = await this.blockchainService.getStorageContractsChunk('', this.offset, this.pageSize);
       this.mockContracts = [...this.mockContracts, ...newContracts];
       this.offset += newContracts.length;
-      this.hasMore = newContracts.length === this.pageSize; // If less than pageSize, assume no more data
+      this.hasMore = newContracts.length === this.pageSize;
     } catch (error) {
       console.error('Error fetching storage contracts:', error);
       this.hasMore = false;
@@ -326,6 +332,36 @@ export class StorageContractsComponent implements OnInit {
       await this.loadContracts();
     }
   }
+
+navigateToContractDetails(contract: StorageContract) {
+  // Use contract.hash and contract.fileUrl as query parameters
+  if (contract.hash && contract.fileUrl) {
+    console.log('Navigating to contract details:', contract.hash, contract.fileUrl);
+    this.router.navigate(['/storageContractDetails'], {
+      queryParams: {
+        contractHash: this.convertBase64ToHex(contract.hash),
+        fileUrl: contract.fileUrl
+      }
+    });
+  } else {
+    console.warn('Invalid contract data: hash or fileUrl is missing', contract);
+  }
+}
+private convertBase64ToHex(base64Str: string): string {
+  try {
+    // Decode Base64 to bytes
+    const bytes = atob(base64Str); // Decode Base64 string to binary
+    // Convert each byte to hex
+    let hex = '';
+    for (let i = 0; i < bytes.length; i++) {
+      hex += ('0' + bytes.charCodeAt(i).toString(16)).slice(-2);
+    }
+    return hex.toLowerCase(); // Return hex string in lowercase for consistency
+  } catch (error) {
+    console.warn('Invalid Base64 string, treating as hex:', base64Str, error);
+    return base64Str; // Return original string if decoding fails (assume it's already hex)
+  }
+}
 
   formatFileLength(bytes: number): string {
     if (bytes <= 0) return '0 Bytes';

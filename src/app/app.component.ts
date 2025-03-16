@@ -35,23 +35,23 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   styles: [`
     :host {
       display: block;
-      background: #F7F8FA;
+      background: #F7FAFC; /* Softer gray background, consistent with BlockDetailsComponent */
       min-height: 100vh;
-      font-family: 'Inter', sans-serif; /* Modern typography */
+      /* font-family removed, handled globally with Inter */
     }
 
     .toolbar {
-      background: #FFFFFF;
-      padding: 0.75rem 2rem; /* Thinner height */
-      height: 64px; /* Fixed height for consistency */
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      background: #FAFAFA !important; /* Forcefully set light gray to override blue */
+      padding: 1rem;
+      height: 64px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 1000;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid #E2E8F0; /* Softer gray border */
     }
 
     .title-link {
@@ -59,48 +59,46 @@ import { RouterLink, RouterOutlet } from '@angular/router';
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      transition: all 0.3s ease-out;
+      transition: all 0.3s ease;
     }
 
     .title {
-      font-size: 1.375rem; /* Slightly smaller for thinner look */
-      font-weight: 600;
-      color: #1A1A1A;
-      padding: 0.25rem 0.75rem;
+      font-size: clamp(1.25rem, 4vw, 1.75rem);
+      font-weight: 500;
+      color: #4A4A4A; /* Dark gray for text */
+      padding: 0.5rem 1rem;
       border-radius: 6px;
-      letter-spacing: 0.2px;
-      transition: all 0.3s ease-out;
+      transition: all 0.3s ease;
     }
 
     .title-link:hover .title {
-      color: #66BB6A;
-      background: rgba(102, 187, 106, 0.05);
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(102, 187, 106, 0.15);
+      color: #2F855A; /* Darker green for hover */
+      background: rgba(47, 133, 90, 0.1); /* Subtle darker green hover background */
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(47, 133, 90, 0.15);
     }
 
     .nav-buttons {
       display: flex;
-      gap: 0.5rem; /* Tighter spacing for modern compactness */
+      gap: 1rem;
     }
 
     .nav-btn {
-      background: #66BB6A;
+      background: #2F855A; /* Darker green for buttons */
       color: #FFFFFF;
-      border-radius: 8px;
-      padding: 0.5rem 1rem; /* Smaller padding for thinner buttons */
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
       font-weight: 500;
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: all 0.3s ease-out;
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+      text-transform: none;
+      transition: all 0.3s ease;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
     .nav-btn:hover {
-      background: #AED581;
+      background: #38A169; /* Lighter darker green for hover */
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 187, 106, 0.25);
+      box-shadow: 0 4px 12px rgba(47, 133, 90, 0.2);
     }
 
     .nav-btn:active {
@@ -109,33 +107,37 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     }
 
     .content {
-      padding: 2rem;
-      max-width: 1440px;
-      margin: 0 auto;
+      padding: 1rem;
+      max-width: 1400px;
+      margin: 1.5rem auto;
       background: #FFFFFF;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      margin-top: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     @media (max-width: 768px) {
       .toolbar {
-        padding: 0.5rem 1rem;
+        padding: 0.75rem;
         height: 56px;
       }
 
       .title {
-        font-size: 1.25rem;
-        padding: 0.2rem 0.5rem;
+        font-size: clamp(1rem, 3.5vw, 1.25rem);
+        padding: 0.25rem 0.75rem;
       }
 
       .nav-btn {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.85rem;
+        padding: 0.375rem 0.75rem;
+        font-size: clamp(0.75rem, 2vw, 0.85rem);
       }
 
       .nav-buttons {
-        gap: 0.3rem;
+        gap: 0.75rem;
+      }
+
+      .content {
+        padding: 0.75rem;
+        margin: 1rem auto;
       }
     }
 
@@ -155,7 +157,12 @@ import { RouterLink, RouterOutlet } from '@angular/router';
       }
 
       .title {
-        font-size: 1.125rem;
+        font-size: clamp(0.9rem, 3vw, 1.125rem);
+      }
+
+      .content {
+        padding: 0.5rem;
+        margin: 0.5rem auto;
       }
     }
   `]

@@ -72,5 +72,19 @@ export interface StorageContract {
   proofFrequency: number;
   windowSize: number;
   fileLength: number;
+  hash: string;
   storageType: StorageType;
+}
+export enum FileProvingWindowState {
+  PENDING = 'PENDING',
+  PROVING = 'PROVING',
+  PROVED = 'PROVED',
+  FAILED = 'FAILED'
+}
+
+export interface FileProvingWindow {
+  poDpChallenge: string;
+  startBlockIndex: number;
+  endBlockIndex: number;
+  state: FileProvingWindowState;
 }
