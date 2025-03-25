@@ -1,4 +1,3 @@
-// storage-contracts.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -36,14 +35,24 @@ import { StorageContract } from '../models/interface';
           </div>
           <div *ngIf="mockContracts.length > 0; else noContractsFound" class="contracts-list">
             <mat-table [dataSource]="mockContracts" class="contracts-table">
-              <ng-container matColumnDef="fileUrl">
-                <mat-header-cell *matHeaderCellDef>File URL</mat-header-cell>
+              <!-- Date Column -->
+              <ng-container matColumnDef="date">
+                <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+                <mat-cell *matCellDef="let contract">
+                  {{ formatFileDateTime(contract.fileUrl).dateTime }}
+                </mat-cell>
+              </ng-container>
+
+              <!-- File Name Column -->
+              <ng-container matColumnDef="fileName">
+                <mat-header-cell *matHeaderCellDef>File Name</mat-header-cell>
                 <mat-cell *matCellDef="let contract" [matTooltip]="contract.fileUrl">
                   <div class="scrollable-text clickable" (click)="navigateToFileViewer($event, contract.fileUrl)">
-                    {{ contract.fileUrl }}
+                    {{ formatFileDateTime(contract.fileUrl).fileName }}
                   </div>
                 </mat-cell>
               </ng-container>
+
               <ng-container matColumnDef="storerAddress">
                 <mat-header-cell *matHeaderCellDef>Storer Address</mat-header-cell>
                 <mat-cell *matCellDef="let contract" [matTooltip]="contract.storerAddress">
@@ -115,8 +124,7 @@ import { StorageContract } from '../models/interface';
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 1#pragma once
-rem;
+      gap: 1rem;
     }
 
     .contracts-card {
@@ -249,7 +257,7 @@ rem;
 
     .load-more button:hover {
       background-color: #38A169;
-      transform: scale/**************************************************************************************/1.05);
+      transform: scale(1.05);
     }
 
     .no-contracts {
@@ -306,7 +314,8 @@ rem;
 export class StorageContractsComponent implements OnInit {
   mockContracts: StorageContract[] = [];
   contractColumns = [
-    'fileUrl',
+    'date',           // New Date column
+    'fileName',       // New File Name column
     'storerAddress',
     'merkleRoot',
     'timestamp',
@@ -363,7 +372,8 @@ export class StorageContractsComponent implements OnInit {
     event.stopPropagation(); // Prevent row click from triggering
     const filename = this.extractFilename(fileUrl);
     this.router.navigate(['/file-viewer'], {
-      queryParams: { filename }
+      queryParams: { filename },
+      state: { returnUrl: '/storageContracts' }
     });
   }
 
@@ -396,5 +406,34 @@ export class StorageContractsComponent implements OnInit {
       unitIndex++;
     }
     return unitIndex === 0 ? `${Math.round(value)} ${units[unitIndex]}` : `${value.toFixed(2)} ${units[unitIndex]}`;
+  }
+
+  // New method to format fileUrl into dateTime and fileName
+  formatFileDateTime(fileUrl: string): { dateTime: string, fileName: string } {
+    const fileName = this.extractFilename(fileUrl);
+    const timestampMatch = fileName.match(/^(\d{14})/);
+    if (timestampMatch) {
+      const timestamp = timestampMatch[1];
+      const year = timestamp.slice(0, 4);
+      const month = timestamp.slice(4, 6);
+      const day = timestamp.slice(6, 8);
+      const hours = timestamp.slice(8, 10);
+      const minutes = timestamp.slice(10, 12);
+      const seconds = timestamp.slice(12, 14);
+
+      const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+      const fileNamePart = fileName.slice(14); // Remove timestamp
+      return { dateTime: formattedDateTime, fileName: fileNamePart.slice(1) };
+    }
+    // If no timestamp, use current date and show full file name
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    return { dateTime: formattedDateTime, fileName: fileName };
   }
 }

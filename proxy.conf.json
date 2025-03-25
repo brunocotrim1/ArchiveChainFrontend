@@ -10,5 +10,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
-  }
+  }, 
+    "/noFrame": {
+      "target": "https://arquivo.pt",
+      "secure": true,
+      "changeOrigin": true,
+      "logLevel": "debug"
+    }
 }

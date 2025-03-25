@@ -1,4 +1,3 @@
-// block-visualizer.component.ts
 import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -7,9 +6,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog'; // Add dialog imports
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
+import { TransactionDetailsComponent } from './transaction-details.component'; // Import TransactionDetailsComponent
 import { Block, Transaction } from '../models/interface';
 import { interval, Subscription } from 'rxjs';
 import { trigger, style, transition, animate, query, stagger } from '@angular/animations';
@@ -17,8 +18,16 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
 @Component({
   standalone: true,
   imports: [
-    CommonModule, MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatTooltipModule, FormsModule, RouterLink
+    CommonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatDialogModule, // Add MatDialogModule
+    FormsModule,
+    RouterLink
   ],
   selector: 'app-block-visualizer',
   template: `
@@ -39,10 +48,13 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
             <div class="blockchain-chain" [@pushAnimation]="filteredBlocks.length" [@.disabled]="!shouldAnimate">
               <div *ngFor="let block of filteredBlocks; let i = index" class="block-wrapper">
                 <div class="block-cube" [routerLink]="['/blocks', block.height]" (click)="onBlockClick(block)"
-                     [matTooltip]="'Block ' + block.height + '\nHash: ' + block.hash">
+                     [matTooltip]="'Block ' + block.height + '\nHash: ' + block.hash + '\nFile: ' + block.posProof.winningFilename">
                   <div class="cube-face cube-front">
                     <h3 class="block-height">{{ block.height }}</h3>
                     <p class="block-hash">{{ block.hash | slice:0:10 }}...</p>
+                    <a class="block-tx block-tx-filename filename-link" (click)="navigateToFileViewer($event, block.posProof.winningFilename)">
+                      {{ formatFileName(block.posProof.winningFilename) }}
+                    </a>
                     <p class="block-tx">{{ block.transactions.length }} Tx</p>
                     <button mat-raised-button class="view-btn" [routerLink]="['/blocks', block.height]">
                       <mat-icon>visibility</mat-icon> View
@@ -55,10 +67,10 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
                   <div class="cube-face cube-right"></div>
                 </div>
                 <div class="block-connector" *ngIf="i < filteredBlocks.length - 1">
-                  <svg class="chain-link" viewBox="0 0 50 40">
-                    <path d="M 5 20 Q 15 10, 25 20 Q 35 30, 45 20" stroke="#66BB6A" stroke-width="2" fill="none" stroke-linecap="round"/>
-                    <circle cx="15" cy="15" r="2.5" fill="#AED581"/>
-                    <circle cx="35" cy="25" r="2.5" fill="#AED581"/>
+                  <svg class="chain-link" viewBox="0 0 60 50">
+                    <path d="M 5 25 Q 20 15, 30 25 Q 40 35, 55 25" stroke="#66BB6A" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <circle cx="20" cy="20" r="2.5" fill="#AED581"/>
+                    <circle cx="40" cy="30" r="2.5" fill="#AED581"/>
                   </svg>
                 </div>
               </div>
@@ -73,7 +85,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
             <h3>Recent Transactions</h3>
             <div class="transactions-list" *ngIf="recentTransactions.length > 0; else noTransactions"
                  [@txPushAnimation]="recentTransactions.length" [@.disabled]="!shouldAnimateTx">
-              <div *ngFor="let tx of recentTransactions" class="transaction-item" (click)="onTransactionClick(tx)"
+              <div *ngFor="let tx of recentTransactions" class="transaction-item" (click)="openTransactionDialog(tx)"
                    [matTooltip]="'TxID: ' + tx.transactionId">
                 <p class="tx-id">{{ tx.transactionId | slice:0:10 }}...</p>
                 <p class="tx-type">{{ tx.type }}</p>
@@ -140,7 +152,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
     }
     .blockchain-container {
       width: 100%;
-      padding: 1rem 1rem 2rem 1rem;
+      padding: 2rem;
       overflow-x: auto;
       overflow-y: hidden;
       background: #FAFAFA;
@@ -148,18 +160,18 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
       border: 1px solid #E0E0E0;
       box-sizing: border-box;
       -webkit-overflow-scrolling: touch;
-      display: flex; /* Added to support centering */
-      justify-content: flex-start; /* Changed to flex-start for scrolling behavior */
-      align-items: center; /* Ensure vertical centering */
-      min-height: 150px; /* Ensure enough height for centering */
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 280px;
     }
     .blockchain-chain {
       display: inline-flex;
       align-items: center;
-      justify-content: center; /* Center blocks horizontally within the chain */
-      gap: 0.75rem;
+      justify-content: center;
+      gap: 1.5rem;
       min-width: max-content;
-      margin: 0 auto; /* Center the chain within the container */
+      margin: 0 auto;
     }
     .block-wrapper {
       display: inline-flex;
@@ -169,8 +181,8 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
     }
     .block-cube {
       position: relative;
-      width: clamp(90px, 30vw, 105px);
-      height: clamp(90px, 30vw, 105px);
+      width: clamp(150px, 40vw, 180px);
+      height: clamp(180px, 45vw, 200px);
       transform-style: preserve-3d;
       transform: rotateX(-20deg) rotateY(-20deg);
       cursor: pointer;
@@ -191,9 +203,9 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
       background: linear-gradient(145deg, #FFFFFF 0%, #F5F5F5 100%);
     }
     .cube-front {
-      padding: 0.5rem;
+      padding: 1rem;
       text-align: center;
-      transform: translateZ(52.5px);
+      transform: translateZ(100px);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -201,59 +213,64 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
       background: #FFFFFF;
       box-shadow: inset 0 0 7.5px rgba(102, 187, 106, 0.1);
     }
-    .cube-back { transform: translateZ(-52.5px) rotateY(180deg); opacity: 0.8; }
-    .cube-top { transform: rotateX(90deg) translateZ(52.5px); background: linear-gradient(145deg, #AED581 0%, #FFFFFF 100%); opacity: 0.9; }
-    .cube-bottom { transform: rotateX(-90deg) translateZ(52.5px); opacity: 0.8; }
-    .cube-left { transform: rotateY(-90deg) translateZ(52.5px); opacity: 0.8; }
-    .cube-right { transform: rotateY(90deg) translateZ(52.5px); opacity: 0.8; }
+    .cube-back { transform: translateZ(-100px) rotateY(180deg); opacity: 0.8; }
+    .cube-top { transform: rotateX(90deg) translateZ(100px); background: linear-gradient(145deg, #AED581 0%, #FFFFFF 100%); opacity: 0.9; }
+    .cube-bottom { transform: rotateX(-90deg) translateZ(100px); opacity: 0.8; }
+    .cube-left { transform: rotateY(-90deg) translateZ(90px); opacity: 0.8; }
+    .cube-right { transform: rotateY(90deg) translateZ(90px); opacity: 0.8; }
     .block-height {
-      font-size: clamp(0.75rem, 2.25vw, 0.9375rem);
+      font-size: clamp(1rem, 2.8vw, 1.2rem);
       font-weight: 600;
       color: #66BB6A;
       margin: 0;
     }
     .block-hash, .block-tx {
-      font-size: clamp(0.5625rem, 1.5vw, 0.6375rem);
+      font-size: clamp(0.7rem, 2vw, 0.8rem);
       color: #424242;
-      word-break: break-all;
-      margin: 0.1875rem 0;
+      margin: 0.3rem 0;
     }
     .block-tx { color: #757575; }
+    .block-tx-filename {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      max-width: 100%;
+      font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+      line-height: 1.2;
+      margin: 0.5rem 0;
+      word-break: break-all;
+    }
+    .filename-link {
+      color: #66BB6A;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .filename-link:hover { color: #AED581; text-decoration: underline; }
     .view-btn {
-      padding: 0.225rem 0.375rem;
-      font-size: clamp(0.5625rem, 1.5vw, 0.6375rem);
+      padding: 0.4rem 0.6rem;
+      font-size: clamp(0.7rem, 2vw, 0.8rem);
       background: #66BB6A;
       color: #FFFFFF;
       border-radius: 3px;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 0.1875rem;
+      gap: 0.3rem;
       width: fit-content;
       margin: 0 auto;
     }
-    .view-btn mat-icon {
-      font-size: clamp(0.675rem, 1.875vw, 0.75rem);
-      height: 0.75rem;
-      width: 0.75rem;
-    }
-    .view-btn:hover {
-      background: #AED581;
-      transform: scale(1.05);
-    }
+    .view-btn mat-icon { font-size: clamp(0.9rem, 2.2vw, 1rem); height: 1rem; width: 1rem; }
+    .view-btn:hover { background: #AED581; transform: scale(1.05); }
     .block-connector {
-      width: clamp(22.5px, 7.5vw, 37.5px);
+      width: clamp(40px, 12vw, 60px);
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
-    .chain-link {
-      width: 100%;
-      height: 30px;
-      transition: transform 0.3s ease;
-    }
+    .chain-link { width: 100%; height: 50px; transition: transform 0.3s ease; }
     .block-cube:hover + .block-connector .chain-link { transform: scale(1.1); }
     .no-blocks, .no-transactions {
       display: flex;
@@ -334,39 +351,41 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
     .tx-type { color: #757575; }
     @media (min-width: 768px) {
       .content-wrapper, .header { padding: 1.5rem 2rem; }
-      .visualizer-transactions-container { flex-direction: row; gap: 2rem; height: 250px; }
+      .visualizer-transactions-container { flex-direction: row; gap: 2rem; height: 380px; }
       .blockchain-container { 
         flex: 1; 
-        padding: 1.5rem; /* Balanced padding for centering */
-        justify-content: flex-start; /* Ensure scrolling works */
-        min-height: 180px; /* Adjusted for smaller blocks */
+        padding: 2.5rem;
+        justify-content: flex-start;
+        min-height: 300px;
       }
-      .blockchain-chain { gap: 1rem; } /* Slightly larger gap for larger screens */
+      .blockchain-chain { gap: 2rem; }
       .transactions-container { width: 400px; height: 100%; }
-      .block-cube { width: 105px; height: 105px; }
-      .block-connector { width: 37.5px; }
+      .block-cube { width: 180px; height: 200px; }
+      .block-connector { width: 60px; }
+      .cube-left { transform: rotateY(-90deg) translateZ(90px); }
+      .cube-right { transform: rotateY(90deg) translateZ(90px); }
     }
     @media (max-width: 767px) {
       .block-cube { transform: rotateX(0deg) rotateY(0deg); }
       .block-cube:hover { transform: scale(1.05); }
       .cube-front { transform: translateZ(0); }
       .cube-back, .cube-top, .cube-bottom, .cube-left, .cube-right { display: none; }
-      .blockchain-chain { gap: 0.375rem; }
-      .block-connector { width: 22.5px; }
+      .blockchain-chain { gap: 1rem; }
+      .block-connector { width: 40px; }
       .visualizer-transactions-container { height: auto; }
-      .blockchain-container, .transactions-container { padding: 0.5rem; }
-      .content-wrapper, .header { padding: 0.75rem; }
+      .blockchain-container, .transactions-container { padding: 1.5rem; }
+      .content-wrapper, .header { padding: 1rem; }
       .blockchain-container { 
-        padding: 0.5rem; 
-        min-height: 120px; /* Adjusted for smaller blocks */
+        padding: 1.5rem; 
+        min-height: 250px;
       }
     }
     @media (max-width: 480px) {
-      .block-cube { width: clamp(75px, 26.25vw, 90px); height: clamp(75px, 26.25vw, 90px); }
-      .block-height { font-size: clamp(0.675rem, 1.875vw, 0.75rem); }
-      .block-hash, .block-tx { font-size: clamp(0.4875rem, 1.5vw, 0.5625rem); }
-      .view-btn { font-size: clamp(0.4875rem, 1.5vw, 0.5625rem); }
-      .view-btn mat-icon { font-size: clamp(0.6rem, 1.5vw, 0.675rem); }
+      .block-cube { width: clamp(130px, 35vw, 150px); height: clamp(160px, 40vw, 180px); }
+      .block-height { font-size: clamp(0.9rem, 2.2vw, 1rem); }
+      .block-hash, .block-tx { font-size: clamp(0.65rem, 1.8vw, 0.7rem); }
+      .view-btn { font-size: clamp(0.65rem, 1.8vw, 0.7rem); }
+      .view-btn mat-icon { font-size: clamp(0.8rem, 2vw, 0.9rem); }
       .tx-id, .tx-type { font-size: clamp(0.7rem, 2vw, 0.8rem); }
       .transactions-container h3 { font-size: clamp(0.9rem, 3vw, 1rem); }
     }
@@ -405,6 +424,7 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   shouldAnimateTx = false;
   private blockchainService = inject(MockBlockchainService);
   private router = inject(Router);
+  private dialog = inject(MatDialog); // Inject MatDialog
   private pollSubscription: Subscription | null = null;
   private isLoading = false;
 
@@ -414,6 +434,7 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
     const blocks = await this.blockchainService.getBlocks(this.limit) ?? [];
     this.allBlocks = blocks.sort((a, b) => b.height - a.height);
     this.filteredBlocks = [...this.allBlocks];
+    console.log('All blocks:', this.allBlocks);
     this.updateRecentTransactions();
     this.startPolling();
   }
@@ -512,12 +533,31 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
     this.recentTransactions = tempTransactions;
   }
 
-  onTransactionClick(tx: Transaction): void {
+  openTransactionDialog(tx: Transaction): void {
     const containingBlock = this.filteredBlocks.find(block => block.transactions.some(t => t.transactionId === tx.transactionId));
-    if (containingBlock) {
-      this.router.navigate(['/transactions', tx.transactionId], { state: { block: containingBlock } });
-    } else {
-      console.error('No block found containing transaction:', tx.transactionId);
-    }
+    this.dialog.open(TransactionDetailsComponent, {
+      width: '500px', // Smaller width
+      maxHeight: '80vh', // Limit height to 80% of viewport
+      data: { transaction: tx, block: containingBlock || null }
+    });
+  }
+
+  formatFileName(fileName: string): string {
+    const timestampMatch = fileName.match(/^(\d{14})/);
+    const displayName = timestampMatch ? fileName.slice(15) : fileName;
+    return displayName;
+  }
+
+  navigateToFileViewer(event: Event, fileUrl: string) {
+    event.stopPropagation();
+    const filename = this.extractFilename(fileUrl);
+    this.router.navigate(['/file-viewer'], {
+      queryParams: { filename },
+      state: { returnUrl: '/blocks' }
+    });
+  }
+
+  extractFilename(fileUrl: string): string {
+    return fileUrl.split('/').pop() || fileUrl;
   }
 }

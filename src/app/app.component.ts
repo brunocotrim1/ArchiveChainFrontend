@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
@@ -9,160 +7,148 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
-    MatToolbarModule,
-    MatButtonModule,
     RouterOutlet,
     RouterLink
   ],
   template: `
-    <mat-toolbar class="toolbar">
+    <header class="toolbar">
       <a [routerLink]="['/blocks']" class="title-link">
-        <span class="title">ArchiveMint Explorer</span>
+        <img src="/assets/images/logo.png" alt="ArchiveMint Explorer" class="title-image">
       </a>
-      <div class="nav-buttons">
-        <button mat-flat-button class="nav-btn" [routerLink]="['/blocks']">Main Menu</button>
-        <button mat-flat-button class="nav-btn" [routerLink]="['/wallets']">Wallet Balances</button>
-        <button mat-flat-button class="nav-btn" [routerLink]="['/storedFiles']">Stored Files</button>
-        <button mat-flat-button class="nav-btn" [routerLink]="['/storageContracts']">Storage Contracts</button>
-        <button mat-flat-button class="nav-btn" [routerLink]="['/sendTransaction']">Send Transaction</button>
-      </div>
-    </mat-toolbar>
+      <nav class="nav-buttons">
+        <a [routerLink]="['/blocks']" class="nav-btn">Main Menu</a>
+        <a [routerLink]="['/wallets']" class="nav-btn">Wallet Balances</a>
+        <a [routerLink]="['/storedFiles']" class="nav-btn">Stored Files</a>
+        <a [routerLink]="['/storageContracts']" class="nav-btn">Storage Contracts</a>
+        <a [routerLink]="['/sendTransaction']" class="nav-btn">Send Transaction</a>
+      </nav>
+    </header>
 
-    <div class="content">
+    <main class="content">
       <router-outlet></router-outlet>
-    </div>
+    </main>
   `,
   styles: [`
     :host {
       display: block;
-      background: #F7FAFC; /* Softer gray background, consistent with BlockDetailsComponent */
+      background: #F5F6F5;
       min-height: 100vh;
-      /* font-family removed, handled globally with Inter */
     }
 
     .toolbar {
-      background: #FAFAFA !important; /* Forcefully set light gray to override blue */
-      padding: 1rem;
-      height: 64px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      background: #FAFAFA;
+      padding: 1rem 2rem;
+      height: 60px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 1000;
-      border-bottom: 1px solid #E2E8F0; /* Softer gray border */
+      border-bottom: 1px solid #E5E7EB;
     }
 
     .title-link {
       text-decoration: none;
-      cursor: pointer;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      transition: all 0.3s ease;
     }
 
-    .title {
-      font-size: clamp(1.25rem, 4vw, 1.75rem);
-      font-weight: 500;
-      color: #4A4A4A; /* Dark gray for text */
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      transition: all 0.3s ease;
+    .title-image {
+      height: 36px;
+      width: auto;
+      transition: transform 0.2s ease;
     }
 
-    .title-link:hover .title {
-      color: #2F855A; /* Darker green for hover */
-      background: rgba(47, 133, 90, 0.1); /* Subtle darker green hover background */
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(47, 133, 90, 0.15);
+    .title-link:hover .title-image {
+      transform: scale(1.05);
     }
 
     .nav-buttons {
       display: flex;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .nav-btn {
-      background: #2F855A; /* Darker green for buttons */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #4B5E54;
       color: #FFFFFF;
+      text-decoration: none;
+      padding: 0.5rem 1.25rem;
       border-radius: 6px;
-      padding: 0.5rem 1rem;
       font-weight: 500;
-      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-      text-transform: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-size: 0.9rem;
+      font-family: 'Roboto', sans-serif;
+      transition: background 0.2s ease, transform 0.1s ease;
     }
 
     .nav-btn:hover {
-      background: #38A169; /* Lighter darker green for hover */
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(47, 133, 90, 0.2);
+      background: #647D71;
+      transform: translateY(-1px);
     }
 
     .nav-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      background: #3A4A43;
+      transform: translateY(0);
     }
 
     .content {
-      padding: 1rem;
+      padding: 1.5rem;
       max-width: 1400px;
-      margin: 1.5rem auto;
+      margin: 2rem auto;
       background: #FFFFFF;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     @media (max-width: 768px) {
       .toolbar {
-        padding: 0.75rem;
+        padding: 0.75rem 1.5rem;
         height: 56px;
       }
 
-      .title {
-        font-size: clamp(1rem, 3.5vw, 1.25rem);
-        padding: 0.25rem 0.75rem;
+      .title-image {
+        height: 32px;
       }
 
       .nav-btn {
-        padding: 0.375rem 0.75rem;
-        font-size: clamp(0.75rem, 2vw, 0.85rem);
+        padding: 0.45rem 1rem;
+        font-size: 0.85rem;
       }
 
       .nav-buttons {
-        gap: 0.75rem;
+        gap: 1rem;
       }
 
       .content {
-        padding: 0.75rem;
-        margin: 1rem auto;
+        padding: 1rem;
+        margin: 1.5rem auto;
       }
     }
 
     @media (max-width: 480px) {
       .toolbar {
-        flex-wrap: wrap;
-        padding: 0.5rem;
+        flex-direction: column;
+        padding: 0.75rem 1rem;
         height: auto;
-        min-height: 56px;
+        align-items: flex-start;
       }
 
       .nav-buttons {
         flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
       }
 
-      .title {
-        font-size: clamp(0.9rem, 3vw, 1.125rem);
+      .title-image {
+        height: 28px;
       }
 
       .content {
-        padding: 0.5rem;
-        margin: 0.5rem auto;
+        padding: 0.75rem;
+        margin: 1rem auto;
       }
     }
   `]

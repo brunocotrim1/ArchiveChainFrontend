@@ -1,12 +1,11 @@
-// transaction-details.component.ts
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { MockBlockchainService } from '../services/blockchain.service';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { RouterLink, Router } from '@angular/router';
 import { Transaction, Block } from '../models/interface';
 
 @Component({
@@ -17,6 +16,7 @@ import { Transaction, Block } from '../models/interface';
     MatListModule,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule,
     RouterLink
   ],
   selector: 'app-transaction-details',
@@ -24,147 +24,153 @@ import { Transaction, Block } from '../models/interface';
     <mat-card class="transaction-details-card">
       <mat-card-header class="header">
         <mat-card-title>Transaction Details</mat-card-title>
-        <mat-card-subtitle>ID: {{ transaction?.transactionId || 'N/A' }}</mat-card-subtitle>
+        <mat-card-subtitle>ID: {{ transaction?.transactionId | slice:0:10 }}...</mat-card-subtitle>
+        <div class="header-actions">
+          <button mat-raised-button class="block-btn" *ngIf="block" (click)="navigateToBlock()" [disabled]="!block?.height">
+            <mat-icon class="nav-icon">navigation</mat-icon>
+            <mat-icon class="spin-icon">cube</mat-icon>
+            <span class="btn-text">Block {{ block?.height }}</span>
+          </button>
+          <button mat-icon-button class="close-icon" (click)="closeDialog()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </mat-card-header>
 
       <mat-card-content class="content">
-        <ng-container *ngIf="transaction; else notFoundTemplate">
-          <div class="details-container">
-            <div class="detail-group">
-              <div class="detail-item">
-                <span class="label">Type</span>
-                <span class="value">{{ transaction.type }}</span>
-              </div>
-            </div>
-
-            <ng-container [ngSwitch]="transaction.type">
-              <!-- Currency Transaction Fields -->
-              <ng-container *ngSwitchCase="'CURRENCY_TRANSACTION'">
-                <div class="detail-group">
-                  <div class="detail-item">
-                    <span class="label">Sender Address</span>
-                    <span class="value">{{ transaction.senderAddress || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Receiver Address</span>
-                    <span class="value">{{ transaction.receiverAddress || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Amount</span>
-                    <span class="value">{{ transaction.amount || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Signature</span>
-                    <span class="value">{{ transaction.signature || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Sender Public Key</span>
-                    <span class="value">{{ transaction.senderPk || 'N/A' }}</span>
-                  </div>
+        <div class="scrollable-content">
+          <ng-container *ngIf="transaction; else notFoundTemplate">
+            <div class="details-container">
+              <div class="detail-group">
+                <div class="detail-item">
+                  <span class="label">Type</span>
+                  <span class="value">{{ transaction.type }}</span>
                 </div>
-              </ng-container>
+              </div>
 
-              <!-- File Proof Fields -->
-              <ng-container *ngSwitchCase="'FILE_PROOF'">
-                <div class="detail-group">
-                  <div class="detail-item">
-                    <span class="label">File URL</span>
-                    <span class="value clickable" (click)="navigateToFileViewer(transaction.fileProof?.fileUrl)">
-                      {{ transaction.fileProof?.fileUrl || 'N/A' }}
-                    </span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Storage Contract Hash</span>
-                    <span class="value clickable" (click)="navigateToStorageContract(transaction.fileProof?.storageContractHash, transaction.fileProof?.fileUrl)">
-                      {{ transaction.fileProof?.storageContractHash || 'N/A' }}
-                    </span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">PoDP Challenge</span>
-                    <span class="value">{{ transaction.fileProof?.poDpChallenge || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Start Block Index</span>
-                    <span class="value">{{ transaction.fileProof?.startBlockIndex ?? 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">End Block Index</span>
-                    <span class="value">{{ transaction.fileProof?.endBlockIndex ?? 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Storer Public Key</span>
-                    <span class="value">{{ transaction.storerPublicKey || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Storer Signature</span>
-                    <span class="value">{{ transaction.storerSignature || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Merkle Proof</span>
-                    <div class="scrollable-value">
-                      {{ transaction.fileProof && transaction.fileProof.merkleProof.length ? transaction.fileProof.merkleProof.join(', ') : 'N/A' }}
+              <ng-container [ngSwitch]="transaction.type">
+                <!-- Currency Transaction Fields -->
+                <ng-container *ngSwitchCase="'CURRENCY_TRANSACTION'">
+                  <div class="detail-group">
+                    <div class="detail-item">
+                      <span class="label">Sender Address</span>
+                      <span class="value">{{ transaction.senderAddress || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Receiver Address</span>
+                      <span class="value">{{ transaction.receiverAddress || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Amount</span>
+                      <span class="value">{{ transaction.amount || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Signature</span>
+                      <span class="value">{{ transaction.signature || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Sender Public Key</span>
+                      <span class="value">{{ transaction.senderPk || 'N/A' }}</span>
                     </div>
                   </div>
-                </div>
-              </ng-container>
+                </ng-container>
 
-              <!-- Storage Contract Submission Fields -->
-              <ng-container *ngSwitchCase="'STORAGE_CONTRACT_SUBMISSION'">
-                <div class="detail-group">
-                  <div class="detail-item">
-                    <span class="label">File URL</span>
-                    <span class="value clickable" (click)="navigateToFileViewer(transaction.contract?.fileUrl)">
-                      {{ transaction.contract?.fileUrl || 'N/A' }}
-                    </span>
+                <!-- File Proof Fields -->
+                <ng-container *ngSwitchCase="'FILE_PROOF'">
+                  <div class="detail-group">
+                    <div class="detail-item">
+                      <span class="label">File URL</span>
+                      <span class="value clickable" (click)="navigateToFileViewer(transaction.fileProof?.fileUrl)">
+                        {{ transaction.fileProof?.fileUrl || 'N/A' }}
+                      </span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Storage Contract Hash</span>
+                      <span class="value clickable" (click)="navigateToStorageContract(transaction.fileProof?.storageContractHash, transaction.fileProof?.fileUrl)">
+                        {{ transaction.fileProof?.storageContractHash || 'N/A' }}
+                      </span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">PoDP Challenge</span>
+                      <span class="value">{{ transaction.fileProof?.poDpChallenge || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Start Block Index</span>
+                      <span class="value">{{ transaction.fileProof?.startBlockIndex ?? 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">End Block Index</span>
+                      <span class="value">{{ transaction.fileProof?.endBlockIndex ?? 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Storer Public Key</span>
+                      <span class="value">{{ transaction.storerPublicKey || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Storer Signature</span>
+                      <span class="value">{{ transaction.storerSignature || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Merkle Proof</span>
+                      <div class="scrollable-value">
+                        {{ transaction.fileProof && transaction.fileProof.merkleProof.length ? transaction.fileProof.merkleProof.join(', ') : 'N/A' }}
+                      </div>
+                    </div>
                   </div>
-                  <div class="detail-item">
-                    <span class="label">Value</span>
-                    <span class="value">{{ transaction.contract?.value || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Storer Address</span>
-                    <span class="value">{{ transaction.contract?.storerAddress || 'N/A' }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">Storer Public Key</span>
-                    <span class="value">{{ transaction.storerPublicKey || 'N/A' }}</span>
-                  </div>
-                </div>
-              </ng-container>
-            </ng-container>
-          </div>
-        </ng-container>
+                </ng-container>
 
-        <ng-template #notFoundTemplate>
-          <div class="not-found">
-            <mat-icon>error_outline</mat-icon>
-            <p>Transaction not found</p>
-          </div>
-        </ng-template>
+                <!-- Storage Contract Submission Fields -->
+                <ng-container *ngSwitchCase="'STORAGE_CONTRACT_SUBMISSION'">
+                  <div class="detail-group">
+                    <div class="detail-item">
+                      <span class="label">File URL</span>
+                      <span class="value clickable" (click)="navigateToFileViewer(transaction.contract?.fileUrl)">
+                        {{ transaction.contract?.fileUrl || 'N/A' }}
+                      </span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Value</span>
+                      <span class="value">{{ transaction.contract?.value || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Storer Address</span>
+                      <span class="value">{{ transaction.contract?.storerAddress || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Storer Public Key</span>
+                      <span class="value">{{ transaction.storerPublicKey || 'N/A' }}</span>
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-template #notFoundTemplate>
+            <div class="not-found">
+              <mat-icon>error_outline</mat-icon>
+              <p>Transaction not found</p>
+            </div>
+          </ng-template>
+        </div>
       </mat-card-content>
-
-      <mat-card-actions class="actions" *ngIf="block">
-        <button mat-raised-button class="back-btn" [routerLink]="['/blocks', block.height]">
-          <mat-icon>arrow_back</mat-icon> Back to Block {{ block.height }}
-        </button>
-      </mat-card-actions>
     </mat-card>
   `,
   styles: [`
     :host {
       display: block;
-      padding: 0.75rem;
-      background: #F7FAFC;
+      padding: 0;
+      background: transparent;
     }
 
     .transaction-details-card {
-      max-width: 900px;
-      margin: 1rem auto;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 500px;
+      margin: 0;
       border-radius: 8px;
-      background: #FFFFFF;
-      border: 1px solid #E2E8F0;
+      box-shadow: none;
       overflow: hidden;
+      background: #FFFFFF;
     }
 
     .header {
@@ -172,35 +178,158 @@ import { Transaction, Block } from '../models/interface';
       background: #F7FAFC;
       border-bottom: 1px solid #E2E8F0;
       color: #4A4A4A;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     mat-card-title {
-      font-size: clamp(1.25rem, 4vw, 1.5rem);
+      font-size: 1.25rem;
       font-weight: 500;
       margin-bottom: 0.25rem;
-      color: #4A4A4A;
     }
 
     mat-card-subtitle {
-      font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+      font-size: 0.85rem;
       color: #6B7280;
       font-weight: 400;
+    }
+
+    .header-actions {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .close-icon {
+      color: #6B7280;
+      transition: color 0.3s ease;
+    }
+
+    .close-icon:hover {
+      color: #E53E3E;
+    }
+
+    .block-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #68D391 0%, #9AE6B4 100%);
+      color: #1A3C34;
+      border-radius: 12px;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 6px rgba(104, 211, 145, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      min-width: 0;
+      justify-content: center; /* Center content to remove extra space */
+    }
+
+    .block-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.25), transparent);
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+      transition: opacity 0.3s ease, transform 0.5s ease;
+    }
+
+    .block-btn:hover::before {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .block-btn:hover {
+      background: linear-gradient(135deg, #9AE6B4 0%, #B2F5EA 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(104, 211, 145, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+
+    .block-btn[disabled] {
+      background: #E2E8F0;
+      color: #A0AEC0;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .block-btn[disabled]::before {
+      display: none;
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      color: #2C7A7B;
+      margin-right: 0.25rem; /* Small spacing between icons */
+    }
+
+    .spin-icon {
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      color: #2C7A7B;
+      transition: transform 0.3s ease;
+    }
+
+    .block-btn:hover .spin-icon {
+      transform: rotate(360deg);
+    }
+
+    .btn-text {
+      position: relative;
+      z-index: 1;
+      white-space: nowrap;
     }
 
     .content {
       padding: 0.75rem;
     }
 
+    .scrollable-content {
+      max-height: 60vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #2F855A #F7FAFC;
+    }
+
+    .scrollable-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scrollable-content::-webkit-scrollbar-track {
+      background: #F7FAFC;
+      border-radius: 3px;
+    }
+
+    .scrollable-content::-webkit-scrollbar-thumb {
+      background: #2F855A;
+      border-radius: 3px;
+    }
+
     .details-container {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .detail-group {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 0.75rem;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
     }
 
     .detail-item {
@@ -214,20 +343,19 @@ import { Transaction, Block } from '../models/interface';
     }
 
     .detail-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       background: #EDF2F7;
+      transform: translateY(-2px);
     }
 
     .label {
-      font-size: clamp(0.75rem, 2vw, 0.85rem);
+      font-size: 0.8rem;
       font-weight: 500;
       color: #2F855A;
       margin-bottom: 0.25rem;
     }
 
     .value {
-      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      font-size: 0.85rem;
       color: #4A4A4A;
       word-break: break-word;
       line-height: 1.4;
@@ -248,7 +376,7 @@ import { Transaction, Block } from '../models/interface';
       max-height: 100px;
       overflow-y: auto;
       padding: 0.25rem;
-      font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+      font-size: 0.8rem;
       color: #4A4A4A;
       scrollbar-width: thin;
       scrollbar-color: #2F855A #F7FAFC;
@@ -288,8 +416,7 @@ import { Transaction, Block } from '../models/interface';
 
     .not-found p {
       margin: 0;
-      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-      color: #6B7280;
+      font-size: 0.9rem;
     }
 
     .actions {
@@ -298,81 +425,48 @@ import { Transaction, Block } from '../models/interface';
       border-top: 1px solid #E2E8F0;
       display: flex;
       justify-content: flex-end;
+      gap: 0.5rem;
     }
 
-    .back-btn {
+    .close-btn {
       display: flex;
       align-items: center;
       gap: 0.25rem;
       padding: 0.3rem 0.5rem;
-      font-size: clamp(0.75rem, 2vw, 0.85rem);
+      font-size: 0.8rem;
       font-weight: 500;
-      background: #2F855A;
-      color: #FFFFFF;
       border-radius: 4px;
+      background: #E53E3E;
+      color: #FFFFFF;
       transition: all 0.3s ease;
     }
 
-    .back-btn:hover {
-      background: #38A169;
+    .close-btn:hover {
+      background: #F56565;
       transform: scale(1.05);
     }
 
-    .back-btn mat-icon {
+    .close-btn mat-icon {
       font-size: 1rem;
       height: 1rem;
       width: 1rem;
       color: #FFFFFF;
     }
 
-    @media (max-width: 768px) {
-      :host {
-        padding: 0.5rem;
-      }
-
-      .transaction-details-card {
-        margin: 0.75rem auto;
-      }
-
-      .header, .content, .actions {
-        padding: 0.5rem;
-      }
-
-      .detail-group {
-        grid-template-columns: 1fr;
-      }
-
-      mat-card-title {
-        font-size: clamp(1rem, 3.5vw, 1.25rem);
-      }
-
-      .label {
-        font-size: clamp(0.7rem, 2vw, 0.8rem);
-      }
-
-      .value, .not-found p {
-        font-size: clamp(0.75rem, 2vw, 0.85rem);
-      }
-    }
-
     @media (max-width: 480px) {
-      :host {
-        padding: 0.25rem;
-      }
-
       .transaction-details-card {
-        margin: 0.5rem auto;
+        max-width: 100%;
       }
-
-      .back-btn {
-        font-size: clamp(0.65rem, 2vw, 0.75rem);
-      }
-
-      .back-btn mat-icon {
-        font-size: 0.9rem;
-        height: 0.9rem;
-        width: 0.9rem;
-      }
+      mat-card-title { font-size: 1.1rem; }
+      mat-card-subtitle { font-size: 0.75rem; }
+      .label { font-size: 0.75rem; }
+      .value { font-size: 0.8rem; }
+      .close-btn { font-size: 0.75rem; }
+      .close-btn mat-icon { font-size: 0.9rem; height: 0.9rem; width: 0.9rem; }
+      .close-icon { top: 0.25rem; right: 0.25rem; }
+      .block-btn { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+      .nav-icon, .spin-icon { font-size: 0.9rem; height: 0.9rem; width: 0.9rem; }
+      .header-actions { flex-wrap: wrap; gap: 0.25rem; }
     }
   `]
 })
@@ -380,30 +474,16 @@ export class TransactionDetailsComponent implements OnInit {
   transaction: Transaction | null = null;
   block: Block | null = null;
 
-  private blockchainService = inject(MockBlockchainService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-
-  constructor() {
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras.state?.['block']) {
-      this.block = navigation.extras.state['block'] as Block;
-    }
+  constructor(
+    private router: Router,
+    public dialogRef: MatDialogRef<TransactionDetailsComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { transaction: Transaction, block: Block | null }
+  ) {
+    this.transaction = data.transaction;
+    this.block = data.block;
   }
 
-  async ngOnInit() {
-    const txId = this.route.snapshot.paramMap.get('id');
-    if (this.block) {
-      this.transaction = this.block.transactions.find(tx => tx.transactionId === txId) || null;
-      console.log('Transaction found in block:', this.transaction);
-    } else {
-      console.log('Navigation state unavailable. History state:', history.state);
-      if (history.state?.block) {
-        this.block = history.state.block as Block;
-        this.transaction = this.block.transactions.find(tx => tx.transactionId === txId) || null;
-      }
-    }
-  }
+  ngOnInit() {}
 
   navigateToStorageContract(contractHash: string | undefined, fileUrl: string | undefined) {
     if (contractHash && fileUrl) {
@@ -413,18 +493,36 @@ export class TransactionDetailsComponent implements OnInit {
           fileUrl: encodeURIComponent(fileUrl)
         }
       });
+      this.closeDialog();
     } else {
       console.warn('Cannot navigate: Missing contractHash or fileUrl', { contractHash, fileUrl });
     }
   }
 
   navigateToFileViewer(fileUrl: string | undefined) {
-    if (fileUrl) {
+    if (fileUrl && this.transaction?.transactionId) {
       const filename = this.extractFilename(fileUrl);
       this.router.navigate(['/file-viewer'], {
-        queryParams: { filename }
+        queryParams: { filename },
+        state: { returnUrl: `/blocks/${this.block?.height}` }
       });
+      this.closeDialog();
+    } else {
+      console.warn('Cannot navigate to file viewer: Missing fileUrl or transactionId', { fileUrl, transactionId: this.transaction?.transactionId });
     }
+  }
+
+  navigateToBlock() {
+    if (this.block?.height !== undefined) {
+      this.router.navigate(['/blocks', this.block.height]);
+      this.closeDialog();
+    } else {
+      console.warn('Cannot navigate: Block height is missing', this.block);
+    }
+  }
+
+  closeDialog(): void {
+    this.dialogRef.close();
   }
 
   private extractFilename(fileUrl: string): string {

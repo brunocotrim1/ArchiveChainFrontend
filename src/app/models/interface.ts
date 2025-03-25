@@ -1,17 +1,29 @@
+export enum StorageType {
+  AES = 'AES',
+  VDE = 'VDE',
+}
+
+export enum FileProvingWindowState {
+  PENDING = 'PENDING',
+  PROVING = 'PROVING',
+  PROVED = 'PROVED',
+  FAILED = 'FAILED'
+}
+
 export interface Transaction {
     type: 'CURRENCY_TRANSACTION' | 'FILE_PROOF' | 'STORAGE_CONTRACT_SUBMISSION';
-    transactionId?: string; // Keeping your reference as-is
+    transactionId?: string;
     amount?: number;
     senderAddress?: string;
     receiverAddress?: string;
     signature?: string;
     senderPk?: string;
     fileProof?: {
-      merkleProof: string[]; // Array of base64-encoded strings or hashes
+      merkleProof: string[];
       storageContractHash: string;
       fileUrl: string;
-      hash?: string; // Optional, if getHash() is included in JSON
-      poDpChallenge?: string; // Optional, matching Java’s PoDpChallenge
+      hash?: string;
+      poDpChallenge?: string;
       startBlockIndex?: number;
       endBlockIndex?: number;
     };
@@ -23,7 +35,7 @@ export interface Transaction {
       storerAddress: string;
       hash: string;
     };
-  }
+}
 
 export interface Block {
     height: number;
@@ -39,13 +51,14 @@ export interface Block {
       };
       proof: string[];
       challenge: string;
+      winningFilename: string;
     };
     potProof: {
-      proof: number | string; // Allow number from backend, convert to string
+      proof: number | string;
       publicKeyTimelord: string;
       signature: string;
-      lPrime: number | string; // Allow number from backend, convert to string
-      t: number; // Matches int T in backend
+      lPrime: number | string;
+      t: number;
     };
     minerPublicKey: string;
     quality: number;
@@ -56,30 +69,19 @@ export interface WalletBalance {
   balance: number;
 }
 
-export enum StorageType {
-  AES = 'AES',
-  VDE = 'VDE',
-}
-
 export interface StorageContract {
   merkleRoot: string;
   fileUrl: string;
   fccnSignature?: string;
   storerSignature?: string;
   storerAddress: string;
-  timestamp: string; // Changed to string for frontend consistency
-  value: number;    // Changed to number (assuming BigInteger is serialized as a number)
+  timestamp: string;
+  value: number;
   proofFrequency: number;
   windowSize: number;
   fileLength: number;
   hash: string;
   storageType: StorageType;
-}
-export enum FileProvingWindowState {
-  PENDING = 'PENDING',
-  PROVING = 'PROVING',
-  PROVED = 'PROVED',
-  FAILED = 'FAILED'
 }
 
 export interface FileProvingWindow {
@@ -87,4 +89,13 @@ export interface FileProvingWindow {
   startBlockIndex: number;
   endBlockIndex: number;
   state: FileProvingWindowState;
+}
+
+export interface WalletDetails {
+  address: string;
+  publicKey: string;
+  wonBlocks: number[]; 
+  balance: string | number;
+  transactions: Transaction[];
+  storageContracts: StorageContract[];
 }

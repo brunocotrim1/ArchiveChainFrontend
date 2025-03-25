@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
+import { Router, RouterModule } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { WalletBalance } from '../models/interface';
 
@@ -10,7 +11,8 @@ import { WalletBalance } from '../models/interface';
   imports: [
     CommonModule,
     MatCardModule,
-    MatTableModule
+    MatTableModule,
+    RouterModule // Added for routing
   ],
   selector: 'app-wallet-balances',
   template: `
@@ -23,14 +25,16 @@ import { WalletBalance } from '../models/interface';
           <mat-table [dataSource]="mockBalances">
             <ng-container matColumnDef="walletAddress">
               <mat-header-cell *matHeaderCellDef>Wallet Address</mat-header-cell>
-              <mat-cell *matCellDef="let wallet">{{ wallet.walletAddress }}</mat-cell>
+              <mat-cell *matCellDef="let wallet" class="clickable" [routerLink]="['/wallet-details', wallet.walletAddress]">
+                {{ wallet.walletAddress }}
+              </mat-cell>
             </ng-container>
             <ng-container matColumnDef="balance">
               <mat-header-cell *matHeaderCellDef>Balance</mat-header-cell>
               <mat-cell *matCellDef="let wallet">{{ wallet.balance }}</mat-cell>
             </ng-container>
             <mat-header-row *matHeaderRowDef="walletColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: walletColumns;"></mat-row>
+            <mat-row *matRowDef="let row; columns: walletColumns;" (click)="navigateToWalletDetails(row.walletAddress)"></mat-row>
           </mat-table>
         </div>
         <ng-template #noWalletsFound>
@@ -46,14 +50,34 @@ import { WalletBalance } from '../models/interface';
     mat-table {
       width: 100%;
     }
+    mat-header-cell, mat得好cell {
+      padding: 0.75rem 0.5rem;
+    }
+    .clickable {
+      cursor: pointer;
+      color: #2F855A;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }
+    .clickable:hover {
+      color: #38A169;
+    }
+    mat-row:hover {
+      background: #EDF2F7;
+    }
   `]
 })
 export class WalletBalancesComponent implements OnInit {
   mockBalances: WalletBalance[] = [];
   walletColumns = ['walletAddress', 'balance'];
   private blockchainService = inject(MockBlockchainService);
+  private router = inject(Router);
 
   async ngOnInit() {
     this.mockBalances = await this.blockchainService.getWalletBalances() ?? [];
+  }
+
+  navigateToWalletDetails(address: string) {
+    this.router.navigate(['/wallet-details', address]);
   }
 }

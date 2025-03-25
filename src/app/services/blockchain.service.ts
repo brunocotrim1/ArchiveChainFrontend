@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Block, Transaction, WalletBalance, StorageContract, FileProvingWindow } from '../models/interface';
+import { Block, Transaction, WalletBalance, StorageContract, FileProvingWindow, WalletDetails } from '../models/interface';
 import { environment } from '../environments/enviroment';
 
 @Injectable({
@@ -185,6 +185,17 @@ export class MockBlockchainService extends BlockchainService {
       return response ?? null;
     } catch (error) {
       console.error('Error fetching storage contract:', error);
+      return null;
+    }
+  }
+  async getWalletDetails(address: string): Promise<WalletDetails | null> {
+    try {
+      let params = new HttpParams()
+        .set('address', address);
+      const response = await this.http.get<WalletDetails>(`${this.backendUrl}/explorer/getWalletDetails`, { params }).toPromise();
+      return response ?? null;
+    } catch (error) {
+      console.error('Error fetching wallet details contract:', error);
       return null;
     }
   }

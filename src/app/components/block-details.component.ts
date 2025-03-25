@@ -6,9 +6,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { TransactionPreviewComponent } from './transaction-preview.component';
+import { TransactionDetailsComponent } from './transaction-details.component';
 import { Block, Transaction } from '../models/interface';
 
 @Component({
@@ -21,6 +23,7 @@ import { Block, Transaction } from '../models/interface';
     MatButtonModule,
     MatIconModule,
     MatExpansionModule,
+    MatDialogModule,
     RouterLink,
     TransactionPreviewComponent
   ],
@@ -49,6 +52,12 @@ import { Block, Transaction } from '../models/interface';
             <div class="detail-item">
               <span class="label">Timestamp</span>
               <span class="value">{{ block.timeStamp }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Winning Filename</span>
+              <a class="value filename-link" (click)="navigateToFileViewer($event, block.posProof.winningFilename)">
+                {{ block.posProof.winningFilename }}
+              </a>
             </div>
             <div class="detail-item">
               <span class="label">Signature</span>
@@ -125,7 +134,7 @@ import { Block, Transaction } from '../models/interface';
               <div 
                 *ngFor="let tx of block.transactions; let i = index" 
                 class="transaction-item clickable" 
-                (click)="navigateToTransaction(tx, block.height)"
+                (click)="openTransactionDialog(tx, block.height)"
               >
                 <app-transaction-preview [transaction]="tx" [index]="i"></app-transaction-preview>
                 <mat-icon class="arrow-icon">chevron_right</mat-icon>
@@ -149,7 +158,7 @@ import { Block, Transaction } from '../models/interface';
         </mat-card-content>
       </ng-template>
 
-      <!-- Back to Blocks Button (Always Visible) -->
+      <!-- Back to Blocks Button -->
       <mat-card-actions class="actions">
         <button mat-raised-button class="back-btn" [routerLink]="['/blocks']">
           <mat-icon>arrow_back</mat-icon> Back to Blocks
@@ -161,7 +170,7 @@ import { Block, Transaction } from '../models/interface';
     :host {
       display: block;
       padding: 1rem;
-      background: #F7FAFC; /* Softer gray background */
+      background: #F7FAFC;
     }
 
     .block-details-card {
@@ -170,27 +179,27 @@ import { Block, Transaction } from '../models/interface';
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       border-radius: 8px;
       background: #FFFFFF;
-      border: 1px solid #E2E8F0; /* Softer gray border */
+      border: 1px solid #E2E8F0;
       overflow: hidden;
     }
 
     .header {
       padding: 1rem;
-      background: #F7FAFC; /* Softer gray header background */
+      background: #F7FAFC;
       border-bottom: 1px solid #E2E8F0;
-      color: #4A4A4A; /* Dark gray for primary text */
+      color: #4A4A4A;
     }
 
     mat-card-title {
       font-size: clamp(1.25rem, 4vw, 1.75rem);
       font-weight: 500;
       margin-bottom: 0.25rem;
-      color: #4A4A4A; /* Dark gray for titles */
+      color: #4A4A4A;
     }
 
     mat-card-subtitle {
       font-size: clamp(0.85rem, 3vw, 1rem);
-      color: #6B7280; /* Lighter gray for secondary text */
+      color: #6B7280;
       font-weight: 400;
     }
 
@@ -208,37 +217,59 @@ import { Block, Transaction } from '../models/interface';
     .detail-item {
       display: flex;
       flex-direction: column;
+      padding: 0.5rem;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .detail-item:hover {
+      background: #EDF2F7;
+      transform: translateY(-2px);
     }
 
     .label {
       font-size: clamp(0.8rem, 2.5vw, 0.9rem);
       font-weight: 500;
-      color: #2F855A; /* Darker green for labels */
+      color: #2F855A; /* Green for labels */
       margin-bottom: 0.25rem;
     }
 
     .value {
       font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-      color: #4A4A4A; /* Dark gray for values */
+      color: #4A4A4A; /* Dark grey for values */
       word-break: break-word;
+    }
+
+    .filename-link {
+      color: #2F855A;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .filename-link:hover {
+      color: #38A169;
+      text-decoration: underline;
     }
 
     .proof-list {
       font-size: clamp(0.75rem, 2vw, 0.85rem);
       line-height: 1.4;
-      color: #4A4A4A; /* Dark gray for proof list */
+      color: #4A4A4A; /* Dark grey for proof list values */
     }
 
     .proof-panel {
       margin-bottom: 1rem;
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      background: #F7FAFC; /* Softer gray background */
+      background: #F7FAFC;
     }
 
     .proof-panel mat-panel-title {
       font-size: clamp(1rem, 3.5vw, 1.25rem);
-      color: #2F855A; /* Darker green for panel titles */
+      color: #2F855A; /* Green for panel titles */
       font-weight: 500;
     }
 
@@ -251,13 +282,13 @@ import { Block, Transaction } from '../models/interface';
 
     .divider {
       margin: 1.5rem 0;
-      background-color: #E2E8F0; /* Softer gray divider */
+      background-color: #E2E8F0;
     }
 
     .transactions-title {
       font-size: clamp(1rem, 3.5vw, 1.25rem);
       font-weight: 500;
-      color: #2F855A; /* Darker green for titles */
+      color: #2F855A; /* Green for transactions title */
       margin: 0 0 0.75rem 0;
     }
 
@@ -266,7 +297,7 @@ import { Block, Transaction } from '../models/interface';
       overflow-y: auto;
       padding-right: 0.5rem;
       scrollbar-width: thin;
-      scrollbar-color: #2F855A #F7FAFC; /* Darker green scrollbar */
+      scrollbar-color: #2F855A #F7FAFC;
     }
 
     .transactions-container::-webkit-scrollbar { width: 6px; }
@@ -276,37 +307,51 @@ import { Block, Transaction } from '../models/interface';
     .transactions-list {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
 
     .transaction-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.5rem;
+      padding: 0.75rem;
       background: #FFFFFF;
-      border: 1px solid #E2E8F0; /* Softer gray border */
-      border-radius: 4px;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
       transition: all 0.3s ease;
       cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .transaction-item:hover {
-      background: #EDF2F7; /* Slightly darker gray for hover */
+      background: #EDF2F7;
       transform: translateX(3px);
-      border-color: #2F855A; /* Darker green border on hover */
+      border-color: #2F855A;
+      box-shadow: 0 3px 6px rgba(47, 133, 90, 0.1);
+    }
+
+    .transaction-item app-transaction-preview {
+      flex: 1;
+      color: #4A4A4A; /* Dark grey for transaction preview values */
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+      font-weight: 400;
+    }
+
+    .transaction-item:hover app-transaction-preview {
+      color: #4A4A4A; /* Maintain dark grey on hover */
     }
 
     .arrow-icon {
-      color: #2F855A; /* Darker green for icons */
-      font-size: 1rem;
-      height: 1rem;
-      width: 1rem;
+      color: #2F855A; /* Green for arrow */
+      font-size: 1.25rem;
+      height: 1.25rem;
+      width: 1.25rem;
       transition: transform 0.3s ease;
+      margin-left: 0.5rem;
     }
 
     .transaction-item:hover .arrow-icon {
-      transform: scale(1.1);
+      transform: translateX(3px);
     }
 
     .no-transactions {
@@ -314,15 +359,15 @@ import { Block, Transaction } from '../models/interface';
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      color: #6B7280; /* Lighter gray for subtle text */
-      background: #F7FAFC; /* Softer gray background */
+      color: #6B7280;
+      background: #F7FAFC;
       border-radius: 6px;
       margin-top: 0.5rem;
     }
 
     .no-transactions mat-icon {
       margin-right: 0.5rem;
-      color: #F6AD55; /* Softer orange for warning icons */
+      color: #F6AD55;
       font-size: 1.25rem;
       height: 1.25rem;
       width: 1.25rem;
@@ -331,21 +376,21 @@ import { Block, Transaction } from '../models/interface';
     .no-transactions p {
       font-size: clamp(0.9rem, 3vw, 1rem);
       margin: 0;
-      color: #6B7280; /* Lighter gray for text */
+      color: #6B7280;
     }
 
     .actions {
       padding: 1rem;
       display: flex;
       justify-content: flex-end;
-      background: #F7FAFC; /* Softer gray background */
-      border-top: 1px solid #E2E8F0; /* Softer gray border */
+      background: #F7FAFC;
+      border-top: 1px solid #E2E8F0;
     }
 
     .back-btn {
       padding: 0.3rem 0.5rem;
       font-size: clamp(0.75rem, 2vw, 0.85rem);
-      background: #2F855A; /* Darker green for buttons */
+      background: #2F855A;
       color: #FFFFFF;
       border-radius: 4px;
       transition: all 0.3s ease;
@@ -355,7 +400,7 @@ import { Block, Transaction } from '../models/interface';
     }
 
     .back-btn:hover {
-      background: #38A169; /* Slightly lighter green for hover */
+      background: #38A169;
       transform: scale(1.05);
     }
 
@@ -371,14 +416,14 @@ import { Block, Transaction } from '../models/interface';
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      color: #6B7280; /* Lighter gray for text */
-      background: #F7FAFC; /* Softer gray background */
+      color: #6B7280;
+      background: #F7FAFC;
       border-radius: 6px;
     }
 
     .not-found mat-icon {
       margin-right: 0.5rem;
-      color: #F6AD55; /* Softer orange for warning icons */
+      color: #F6AD55;
       font-size: 1.25rem;
       height: 1.25rem;
       width: 1.25rem;
@@ -387,58 +432,26 @@ import { Block, Transaction } from '../models/interface';
     .not-found p {
       font-size: clamp(0.9rem, 3vw, 1rem);
       margin: 0;
-      color: #6B7280; /* Lighter gray for text */
+      color: #6B7280;
     }
 
     @media (max-width: 768px) {
-      :host {
-        padding: 0.75rem;
-      }
-
-      .block-details-card {
-        margin: 1rem auto;
-      }
-
-      .header, .content, .actions {
-        padding: 0.75rem;
-      }
-
-      .details-grid, .proof-content {
-        grid-template-columns: 1fr;
-        gap: 0.75rem 1rem;
-      }
-
-      .transactions-title, mat-panel-title {
-        font-size: clamp(0.9rem, 3vw, 1rem);
-      }
+      :host { padding: 0.75rem; }
+      .block-details-card { margin: 1rem auto; }
+      .header, .content, .actions { padding: 0.75rem; }
+      .details-grid, .proof-content { grid-template-columns: 1fr; gap: 0.75rem 1rem; }
+      .transactions-title, mat-panel-title { font-size: clamp(0.9rem, 3vw, 1rem); }
+      .transaction-item { padding: 0.5rem; }
     }
 
     @media (max-width: 480px) {
-      :host {
-        padding: 0.5rem;
-      }
-
-      .block-details-card {
-        margin: 0.5rem auto;
-      }
-
-      .header, .content, .actions {
-        padding: 0.5rem;
-      }
-
-      .label, .value {
-        font-size: clamp(0.7rem, 2vw, 0.8rem);
-      }
-
-      .back-btn {
-        font-size: clamp(0.65rem, 2vw, 0.75rem);
-      }
-
-      .back-btn mat-icon {
-        font-size: 0.9rem;
-        height: 0.9rem;
-        width: 0.9rem;
-      }
+      :host { padding: 0.5rem; }
+      .block-details-card { margin: 0.5rem auto; }
+      .header, .content, .actions { padding: 0.5rem; }
+      .label, .value { font-size: clamp(0.7rem, 2vw, 0.8rem); }
+      .back-btn { font-size: clamp(0.65rem, 2vw, 0.75rem); }
+      .back-btn mat-icon { font-size: 0.9rem; height: 0.9rem; width: 0.9rem; }
+      .arrow-icon { font-size: 1rem; height: 1rem; width: 1rem; }
     }
   `]
 })
@@ -447,6 +460,7 @@ export class BlockDetailsComponent implements OnInit {
   private blockchainService = inject(MockBlockchainService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
 
   async ngOnInit() {
     const height = Number(this.route.snapshot.paramMap.get('height'));
@@ -457,13 +471,23 @@ export class BlockDetailsComponent implements OnInit {
     }
   }
 
-  navigateToTransaction(tx: Transaction, height: number): void {
-    const txId = tx.transactionId;
-    const blockHeight = height;
-    if (txId) {
-      this.router.navigate(['/transactions', tx.transactionId], {
-        state: { block: this.block }
-      });
-    }
+  openTransactionDialog(tx: Transaction, height: number): void {
+    this.dialog.open(TransactionDetailsComponent, {
+      width: '600px',
+      data: { transaction: tx, block: this.block }
+    });
+  }
+
+  navigateToFileViewer(event: Event, fileUrl: string) {
+    event.stopPropagation();
+    const filename = this.extractFilename(fileUrl);
+    this.router.navigate(['/file-viewer'], {
+      queryParams: { filename },
+      state: { returnUrl: `/blocks/${this.block?.height}` }
+    });
+  }
+
+  extractFilename(fileUrl: string): string {
+    return fileUrl.split('/').pop() || fileUrl;
   }
 }
