@@ -19,8 +19,11 @@ export abstract class BlockchainService {
   abstract getArchivedStorage(): Promise<string>;
   abstract getTotalAmountOfContracts(): Promise<string>;
   abstract getTotalAmountOfCoins(): Promise<string>;
+  abstract getTotalAmountOfFiles(): Promise<string>;
+  abstract getStorersOfFile(fileUrl: string): Promise<string[]>;
   abstract getStorageContract(contractHash: string, fileUrl: string): Promise<StorageContract | null>;
   abstract getContractFileProvingWindows(contractHash: string): Promise<FileProvingWindow[]>;
+  abstract getStorageHashFileAndAddress(fileUrl: string, address: string): Promise<string>; // New abstract method
 }
 
 @Injectable({
@@ -81,10 +84,9 @@ export class MockBlockchainService extends BlockchainService {
   async getStorageContractsChunk(fileName: string, offset: number, limit: number): Promise<StorageContract[]> {
     try {
       let params = new HttpParams()
-        .set('fileName', encodeURIComponent(fileName)) // Encode fileName to handle special characters
+        .set('fileName', encodeURIComponent(fileName))
         .set('offset', offset.toString())
         .set('limit', limit.toString());
-  
       const response = await this.http.get<StorageContract[]>(`${this.backendUrl}/explorer/storageContractsChunk`, { params }).toPromise();
       return response ?? [];
     } catch (error) {
@@ -176,6 +178,27 @@ export class MockBlockchainService extends BlockchainService {
     }
   }
 
+  async getTotalAmountOfFiles(): Promise<string> {
+    try {
+      const response = await this.http.get<string>(`${this.backendUrl}/explorer/totalAmountOfFiles`).toPromise();
+      return response ?? '0';
+    } catch (error) {
+      console.error('Error fetching total amount of files:', error);
+      return '0';
+    }
+  }
+
+  async getStorersOfFile(fileUrl: string): Promise<string[]> {
+    try {
+      let params = new HttpParams().set('fileUrl', encodeURIComponent(fileUrl));
+      const response = await this.http.get<string[]>(`${this.backendUrl}/explorer/getStorersOfFile`, { params }).toPromise();
+      return response ?? [];
+    } catch (error) {
+      console.error('Error fetching storers of file:', error);
+      return [];
+    }
+  }
+
   async getStorageContract(contractHash: string, fileUrl: string): Promise<StorageContract | null> {
     try {
       let params = new HttpParams()
@@ -188,17 +211,6 @@ export class MockBlockchainService extends BlockchainService {
       return null;
     }
   }
-  async getWalletDetails(address: string): Promise<WalletDetails | null> {
-    try {
-      let params = new HttpParams()
-        .set('address', address);
-      const response = await this.http.get<WalletDetails>(`${this.backendUrl}/explorer/getWalletDetails`, { params }).toPromise();
-      return response ?? null;
-    } catch (error) {
-      console.error('Error fetching wallet details contract:', error);
-      return null;
-    }
-  }
 
   async getContractFileProvingWindows(contractHash: string): Promise<FileProvingWindow[]> {
     try {
@@ -208,6 +220,51 @@ export class MockBlockchainService extends BlockchainService {
     } catch (error) {
       console.error('Error fetching file proving windows:', error);
       return [];
+    }
+  }
+
+  async getWalletDetails(address: string): Promise<WalletDetails | null> {
+    try {
+      let params = new HttpParams().set('address', address);
+      const response = await this.http.get<WalletDetails>(`${this.backendUrl}/explorer/getWalletDetails`, { params }).toPromise();
+      return response ?? null;
+    } catch (error) {
+      console.error('Error fetching wallet details:', error);
+      return null;
+    }
+  }
+
+  async getStorageHashFileAndAddress(fileUrl: string, address: string): Promise<string> {
+    try {
+      let params = new HttpParams()
+        .set('fileUrl', encodeURIComponent(fileUrl))
+        .set('address', address);
+      const response = await this.http
+        .get(`${this.backendUrl}/explorer/getStorageHashFileAndAddress`, { params, responseType: 'text' })
+        .toPromise();
+      return response ?? '';
+    } catch (error) {
+      console.error('Error fetching storage hash for file and address:', error);
+      return '';
+    }
+  }
+  async getStorageHistory(): Promise<HashMap<string, string>> {
+    try {
+      const response = await this.http.get<HashMap<string, string>>(`${this.backendUrl}/explorer/getStorageHistory`).toPromise();
+      return response ?? {};
+    } catch (error) {
+      console.error('Error fetching storage history:', error);
+      throw error;
+    }
+  }
+
+  async getFileHistory(): Promise<HashMap<string, string>> {
+    try {
+      const response = await this.http.get<HashMap<string, string>>(`${this.backendUrl}/explorer/getFileHistory`).toPromise();
+      return response ?? {};
+    } catch (error) {
+      console.error('Error fetching file history:', error);
+      throw error;
     }
   }
 }

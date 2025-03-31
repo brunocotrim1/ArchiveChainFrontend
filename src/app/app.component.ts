@@ -20,7 +20,6 @@ import { RouterLink, RouterOutlet } from '@angular/router';
         <a [routerLink]="['/wallets']" class="nav-btn">Wallet Balances</a>
         <a [routerLink]="['/storedFiles']" class="nav-btn">Stored Files</a>
         <a [routerLink]="['/storageContracts']" class="nav-btn">Storage Contracts</a>
-        <a [routerLink]="['/sendTransaction']" class="nav-btn">Send Transaction</a>
       </nav>
     </header>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ViewChild } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTable } from '@angular/material/table';
@@ -9,6 +9,216 @@ import { MockBlockchainService } from '../services/blockchain.service';
 import { FormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+
+// Dialog Component
+@Component({
+  selector: 'app-storers-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule
+  ],
+  template: `
+    <div class="dialog-container">
+      <h2 mat-dialog-title class="dialog-title">Storers for {{ data.title }}</h2>
+      <mat-dialog-content class="dialog-content">
+        <div *ngIf="data.storers && data.storers.length > 0; else noStorers" class="storers-list">
+          <div *ngFor="let storer of data.storers" class="storer-item">
+            <span class="storer-address clickable" (click)="navigateToWallet(storer)">
+              {{ storer }}
+            </span>
+            <button mat-raised-button class="contract-btn" (click)="navigateToContract(storer)">
+              <mat-icon>assignment</mat-icon> View Contract
+            </button>
+          </div>
+        </div>
+        <ng-template #noStorers>
+          <p class="no-storers">No storers found for this file.</p>
+        </ng-template>
+      </mat-dialog-content>
+      <mat-dialog-actions class="dialog-actions">
+        <button mat-raised-button class="close-btn" mat-dialog-close>
+          <mat-icon>close</mat-icon> Close
+        </button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [`
+    .dialog-container {
+      padding: 1rem;
+      background: #FFFFFF;
+      border-radius: 8px;
+    }
+
+    .dialog-title {
+      font-size: 1.75rem;
+      font-weight: 500;
+      color: #2F855A;
+      margin: 0 0 1rem 0;
+      padding: 0.5rem 1rem;
+      background: #F7FAFC;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .dialog-content {
+      min-height: 150px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: #2F855A #F7FAFC;
+    }
+
+    .dialog-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .dialog-content::-webkit-scrollbar-track {
+      background: #F7FAFC;
+      border-radius: 3px;
+    }
+
+    .dialog-content::-webkit-scrollbar-thumb {
+      background: #2F855A;
+      border-radius: 3px;
+    }
+
+    .storers-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .storer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: #F7FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .storer-item:hover {
+      background: #EDF2F7;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .storer-address {
+      font-size: 0.9rem;
+      font-family: 'Roboto Mono', monospace;
+      color: #4A4A4A;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+      word-break: break-all;
+      max-width: 60%;
+    }
+
+    .storer-address:hover {
+      color: #38A169;
+    }
+
+    .contract-btn {
+      background: #2F855A;
+      color: #FFFFFF;
+      font-size: 0.9rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.3s ease;
+    }
+
+    .contract-btn:hover {
+      background: #38A169;
+      transform: scale(1.05);
+    }
+
+    .contract-btn mat-icon {
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      color: #FFFFFF;
+    }
+
+    .no-storers {
+      font-size: 1rem;
+      color: #6B7280;
+      text-align: center;
+      padding: 1rem;
+      background: #F7FAFC;
+      border-radius: 6px;
+    }
+
+    .dialog-actions {
+      padding: 0.75rem 1rem;
+      background: #F7FAFC;
+      border-top: 1px solid #E2E8F0;
+      justify-content: flex-end;
+    }
+
+    .close-btn {
+      background: #6B7280;
+      color: #FFFFFF;
+      font-size: 0.9rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: #4A4A4A;
+      transform: scale(1.05);
+    }
+
+    .close-btn mat-icon {
+      font-size: 1rem;
+      height: 1rem;
+      width: 1rem;
+      color: #FFFFFF;
+    }
+  `]
+})
+export class StorersDialogComponent {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { title: string, storers: string[], fileUrl: string },
+    private router: Router,
+    private blockchainService: MockBlockchainService,
+    private dialogRef: MatDialogRef<StorersDialogComponent> // Inject MatDialogRef
+  ) {}
+
+  navigateToWallet(storer: string) {
+    this.router.navigate(['/wallet-details', storer]);
+  }
+
+  async navigateToContract(storer: string) {
+    try {
+      const contractHash = await this.blockchainService.getStorageHashFileAndAddress(this.data.fileUrl, storer);
+      if (contractHash) {
+        this.router.navigate(['/storageContractDetails'], {
+          queryParams: { contractHash, fileUrl: this.data.fileUrl }
+        });
+        this.dialogRef.close(); // Close the dialog after navigation
+      } else {
+        console.warn(`No contract hash found for storer ${storer} and file ${this.data.fileUrl}`);
+      }
+    } catch (error) {
+      console.error('Error fetching contract hash:', error);
+    }
+  }
+}
 
 @Component({
   standalone: true,
@@ -20,7 +230,10 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatFormFieldModule,
     FormsModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule
   ],
   selector: 'app-stored-files',
   template: `
@@ -53,10 +266,20 @@ import { MatNativeDateModule } from '@angular/material/core';
                   <span class="url-link" (click)="onTitleClick($event, row)">{{ row.title }}</span>
                 </mat-cell>
               </ng-container>
+              <ng-container matColumnDef="storerCount">
+                <mat-header-cell *matHeaderCellDef>Number of Storers</mat-header-cell>
+                <mat-cell *matCellDef="let row">{{ row.storerCount }}</mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="expand">
+                <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                  <button mat-icon-button (click)="openStorersDialog(row, $event)" [disabled]="row.storerCount === 0">
+                    <mat-icon>info</mat-icon>
+                  </button>
+                </mat-cell>
+              </ng-container>
               <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: displayedColumns;" 
-                       class="clickable-row" 
-                       (click)="onRowClick(row)"></mat-row>
+              <mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row"></mat-row>
             </mat-table>
           </div>
           <ng-template #noFilesFound>
@@ -114,18 +337,6 @@ import { MatNativeDateModule } from '@angular/material/core';
       color: #2F855A;
     }
 
-    .search-field ::ng-deep .mat-mdc-form-field-focus-overlay {
-      background-color: rgba(47, 133, 90, 0.1);
-    }
-
-    .search-field ::ng-deep .mat-mdc-form-field-label {
-      color: #2F855A;
-    }
-
-    .search-field ::ng-deep .mat-mdc-form-field:hover .mat-mdc-form-field-outline {
-      color: #38A169;
-    }
-
     .files-table {
       width: 100%;
     }
@@ -167,6 +378,14 @@ import { MatNativeDateModule } from '@angular/material/core';
       font-size: 1rem;
     }
 
+    mat-icon {
+      color: #2F855A;
+    }
+
+    button[disabled] mat-icon {
+      color: #cccccc;
+    }
+
     @media (min-width: 768px) {
       :host {
         padding: 2rem;
@@ -188,23 +407,31 @@ import { MatNativeDateModule } from '@angular/material/core';
   `]
 })
 export class StoredFilesComponent implements OnInit {
-  files: { originalName: string, dateTime: string, title: string }[] = [];
-  filteredFiles: { originalName: string, dateTime: string, title: string }[] = [];
+  files: { originalName: string, dateTime: string, title: string, storerCount: number, storers?: string[] }[] = [];
+  filteredFiles: { originalName: string, dateTime: string, title: string, storerCount: number, storers?: string[] }[] = [];
   searchTerm: string = '';
   isAscending: boolean = true;
-  displayedColumns: string[] = ['dateTime', 'title'];
+  displayedColumns: string[] = ['dateTime', 'title', 'storerCount', 'expand'];
   @ViewChild(MatTable) table!: MatTable<any>;
   private blockchainService = inject(MockBlockchainService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   async ngOnInit() {
     try {
       const rawFiles = await this.blockchainService.getStoredFiles() ?? [];
-      this.files = rawFiles.map(file => ({
-        originalName: file,
-        ...this.formatFileName(file)
+      this.files = await Promise.all(rawFiles.map(async file => {
+        const storers = await this.blockchainService.getStorersOfFile(file);
+        console.log(`File: ${file}, Storers:`, storers);
+        return {
+          originalName: file,
+          ...this.formatFileName(file),
+          storerCount: storers.length,
+          storers: storers
+        };
       }));
-      this.filteredFiles = [...this.files]; // Initialize filtered list
+      this.filteredFiles = [...this.files];
+      console.log('Filtered Files:', this.filteredFiles);
     } catch (error) {
       console.error('Error fetching stored files:', error);
       this.files = [];
@@ -217,7 +444,7 @@ export class StoredFilesComponent implements OnInit {
       file.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       file.dateTime.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
-    if (this.table) this.table.renderRows(); // Refresh table display
+    if (this.table) this.table.renderRows();
   }
 
   sortByDate() {
@@ -226,8 +453,8 @@ export class StoredFilesComponent implements OnInit {
       const dateB = new Date(b.dateTime.split(' ')[0].split('/').reverse().join('-'));
       return this.isAscending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
     });
-    this.isAscending = !this.isAscending; // Toggle sort direction
-    if (this.table) this.table.renderRows(); // Refresh table display
+    this.isAscending = !this.isAscending;
+    if (this.table) this.table.renderRows();
   }
 
   onRowClick(row: any) {
@@ -238,15 +465,27 @@ export class StoredFilesComponent implements OnInit {
   }
 
   onTitleClick(event: MouseEvent, row: any) {
-    event.stopPropagation(); // Prevent row click from triggering
+    event.stopPropagation();
     this.router.navigate(['/file-viewer'], {
       queryParams: { filename: row.originalName },
       state: { returnUrl: '/storedFiles' }
     });
   }
 
+  openStorersDialog(row: any, event: MouseEvent) {
+    event.stopPropagation();
+    console.log('Opening dialog for:', row);
+    this.dialog.open(StorersDialogComponent, {
+      width: '600px',
+      data: {
+        title: row.title,
+        storers: row.storers,
+        fileUrl: row.originalName
+      }
+    });
+  }
+
   private formatFileName(fileName: string): { dateTime: string, title: string } {
-    // Check for a 14-digit timestamp (YYYYMMDDhhmmss) at the start
     const timestampMatch = fileName.match(/^(\d{14})/);
     if (timestampMatch) {
       const timestamp = timestampMatch[1];
@@ -258,10 +497,9 @@ export class StoredFilesComponent implements OnInit {
       const seconds = timestamp.slice(12, 14);
 
       const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-      const titlePart = fileName.slice(15).replace('.html', ''); // Remove timestamp and .html
+      const titlePart = fileName.slice(15).replace('.html', '');
       return { dateTime: formattedDateTime, title: titlePart };
     }
-    // If no timestamp, use current date and time
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');

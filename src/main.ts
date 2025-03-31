@@ -8,7 +8,6 @@ import { TransactionDetailsComponent } from './app/components/transaction-detail
 import { WalletBalancesComponent } from './app/components/wallet-balances.component';
 import { StoredFilesComponent } from './app/components/stored-files.component';
 import { StorageContractsComponent } from './app/components/storage-contracts.component';
-import { SendTransactionComponent } from './app/components/send-transaction.component';
 import { MockBlockchainService } from './app/services/blockchain.service';
 import { provideHttpClient } from '@angular/common/http';
 import { StorageContractDetailsComponent } from './app/components/storage-contract-details.component';
@@ -22,7 +21,6 @@ const routes: Routes = [
   { path: 'wallets', component: WalletBalancesComponent },
   { path: 'storedFiles', component: StoredFilesComponent },
   { path: 'storageContracts', component: StorageContractsComponent },
-  { path: 'sendTransaction', component: SendTransactionComponent },
   { path: 'storageContractDetails', component: StorageContractDetailsComponent },
   { path: 'file-viewer', component: FileViewerComponent },
   { path: 'wallet-details/:address', component: WalletDetailsComponent }
