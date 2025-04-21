@@ -228,7 +228,7 @@ export class BlockChartComponent implements OnInit {
     datasets: [
       {
         data: [],
-        label: 'Cumulative Storage Used (GB)',
+        label: 'Cumulative Storage Used (TB)',
         backgroundColor: '#63B3ED',
         borderColor: '#63B3ED',
         borderWidth: 1
@@ -240,7 +240,7 @@ export class BlockChartComponent implements OnInit {
     maintainAspectRatio: false,
     scales: {
       x: { title: { display: true, text: 'Time', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Storage (GB)', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} GB` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      y: { title: { display: true, text: 'Storage (GB)', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} TB` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
     },
     plugins: {
       legend: { labels: { color: '#4A4A4A' }, position: 'top' },
@@ -269,7 +269,7 @@ export class BlockChartComponent implements OnInit {
     maintainAspectRatio: false,
     scales: {
       x: { title: { display: true, text: 'Time', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Files', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} Files` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      y: { title: { display: true, text: 'Files', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value}M Files` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
     },
     plugins: {
       legend: { labels: { color: '#4A4A4A' }, position: 'top' },

@@ -203,7 +203,7 @@ export class MockBlockchainService extends BlockchainService {
     try {
       let params = new HttpParams()
         .set('contractHash', contractHash)
-        .set('fileUrl', fileUrl);
+        .set('fileUrl', encodeURIComponent(fileUrl));
       const response = await this.http.get<StorageContract>(`${this.backendUrl}/explorer/getStorageContract`, { params }).toPromise();
       return response ?? null;
     } catch (error) {

@@ -543,7 +543,7 @@ export class WalletDetailsComponent implements OnInit {
   }
 
   extractFilename(fileUrl: string): string {
-    return fileUrl.split('/').pop() || fileUrl;
+    return fileUrl.split('/').slice(1).join('/') || fileUrl;
   }
 
   private convertBase64ToHex(base64Str: string): string {

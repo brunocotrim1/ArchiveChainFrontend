@@ -311,7 +311,7 @@ export class FileViewerComponent implements OnInit {
       const timestamp = timestampMatch[0];
       const date = `${timestamp.slice(0, 4)}-${timestamp.slice(4, 6)}-${timestamp.slice(6, 8)}`;
       const time = `${timestamp.slice(8, 10)}:${timestamp.slice(10, 12)}:${timestamp.slice(12, 14)}`;
-      const name = fileName.slice(14);
+      const name = fileName.slice(14).slice(1);
       return `${date} ${time} ${name}`;
     }
     return fileName;

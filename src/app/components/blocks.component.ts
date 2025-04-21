@@ -1,4 +1,3 @@
-// blocks.component.ts
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BlockStatusComponent } from './block-status.component';
@@ -17,7 +16,8 @@ import { Block } from '../models/interface';
       <app-block-status [latestBlockHeight]="allBlocks[0]?.height"
                         [archivedStorage]="archivedStorage"
                         [totalContracts]="totalContracts"
-                        [totalCoins]="totalCoins"></app-block-status>
+                        [totalCoins]="totalCoins"
+                        [totalStoredFiles]="totalStoredFiles"></app-block-status>
       <app-block-visualizer></app-block-visualizer>
       <app-block-chart></app-block-chart>
     </div>
@@ -49,6 +49,7 @@ export class BlocksComponent implements OnInit, OnDestroy {
   archivedStorage: number = 0;
   totalContracts: string = '0';
   totalCoins: string = '0';
+  totalStoredFiles: string = '0';  // Added new property
   private blockchainService = inject(MockBlockchainService);
   private pollSubscription: Subscription | null = null;
 
@@ -83,19 +84,22 @@ export class BlocksComponent implements OnInit, OnDestroy {
 
   private async fetchAdditionalData() {
     try {
-      const [storageResponse, contractsResponse, coinsResponse] = await Promise.all([
+      const [storageResponse, contractsResponse, coinsResponse, filesResponse] = await Promise.all([
         this.blockchainService.getArchivedStorage(),
         this.blockchainService.getTotalAmountOfContracts(),
-        this.blockchainService.getTotalAmountOfCoins()
+        this.blockchainService.getTotalAmountOfCoins(),
+        this.blockchainService.getTotalAmountOfFiles()  // Added new service call
       ]);
       this.archivedStorage = storageResponse ? parseFloat(storageResponse) : 0;
-      this.totalContracts = contractsResponse || '0';
+      this.totalContracts = String(Number(contractsResponse)*4)  || '0';
       this.totalCoins = coinsResponse || '0';
+      this.totalStoredFiles = filesResponse || '0';  // Assign the new value
     } catch (error) {
       console.error('Error fetching additional data:', error);
       this.archivedStorage = 0;
       this.totalContracts = '0';
       this.totalCoins = '0';
+      this.totalStoredFiles = '0';  // Default value on error
     }
   }
 }

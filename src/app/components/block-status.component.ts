@@ -1,5 +1,4 @@
-// block-status.component.ts
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,11 +19,15 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
       <div class="status-item">
         <mat-icon>assignment</mat-icon>
-        <span>Total Contracts: <strong>{{ totalContracts }}</strong></span>
+        <span>Total Contracts: <strong>{{ totalContracts }}M</strong></span>
       </div>
       <div class="status-item">
         <mat-icon>monetization_on</mat-icon>
         <span>Total Coins: <strong>{{ totalCoins }}</strong></span>
+      </div>
+      <div class="status-item">
+        <mat-icon>folder</mat-icon>
+        <span>Total Stored Files: <strong>{{ totalStoredFiles || 'N/A' }}M</strong></span>
       </div>
     </mat-card>
   `,
@@ -34,12 +37,13 @@ import { MatIconModule } from '@angular/material/icon';
       border-radius: 6px;
       padding: 0.75rem;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: row;
       gap: 0.5rem;
       box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
       border: 1px solid #E0E0E0;
       width: 100%;
       box-sizing: border-box;
+      overflow-x: auto;
     }
     .status-item {
       display: flex;
@@ -47,8 +51,8 @@ import { MatIconModule } from '@angular/material/icon';
       gap: 0.5rem;
       color: #424242;
       font-size: 0.85rem;
-      flex: 1 1 100%;
-      min-width: 0;
+      flex: 1 1 auto;
+      min-width: 150px;
     }
     .status-item mat-icon {
       color: #66BB6A;
@@ -67,16 +71,35 @@ import { MatIconModule } from '@angular/material/icon';
       font-weight: 600;
     }
     @media (min-width: 768px) {
-      .status-bar { padding: 1rem; flex-wrap: nowrap; gap: 1rem; }
-      .status-item { font-size: 0.9rem; flex: 1 1 25%; }
-      .status-item mat-icon { font-size: 1.25rem; height: 1.25rem; width: 1.25rem; }
+      .status-bar {
+        padding: 1rem;
+        gap: 1rem;
+      }
+      .status-item {
+        font-size: 0.9rem;
+        min-width: 0;
+      }
+      .status-item mat-icon {
+        font-size: 1.25rem;
+        height: 1.25rem;
+        width: 1.25rem;
+      }
     }
     @media (max-width: 767px) {
-      .status-bar { justify-content: space-around; }
+      .status-bar {
+        justify-content: flex-start;
+      }
     }
     @media (max-width: 480px) {
-      .status-item { font-size: 0.8rem; }
-      .status-item mat-icon { font-size: 1rem; height: 1rem; width: 1rem; }
+      .status-item {
+        font-size: 0.8rem;
+        min-width: 120px;
+      }
+      .status-item mat-icon {
+        font-size: 1rem;
+        height: 1rem;
+        width: 1rem;
+      }
     }
   `]
 })
@@ -85,10 +108,12 @@ export class BlockStatusComponent {
   @Input() archivedStorage: number = 0;
   @Input() totalContracts: string = '0';
   @Input() totalCoins: string = '0';
+  @Input() totalStoredFiles: string | undefined;
 
   formatStorage(bytes: number): string {
     if (bytes <= 0) return '0 MB';
-    const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    //const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const units = ['TB', 'TB', 'TB', 'TB', 'TB'];
     let value = bytes;
     let unitIndex = 0;
     while (value >= 1000 && unitIndex < units.length - 1) {

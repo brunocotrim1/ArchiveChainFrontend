@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { FooterComponent } from './components/footer.component';
+import { PersonalPhotoComponent } from './components/personal-photo.component'; // Adjust path if needed
 
 @Component({
   selector: 'app-root',
@@ -8,24 +10,30 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   imports: [
     CommonModule,
     RouterOutlet,
-    RouterLink
+    RouterLink,
+    FooterComponent,
+    PersonalPhotoComponent // Add the new component
   ],
   template: `
-    <header class="toolbar">
-      <a [routerLink]="['/blocks']" class="title-link">
-        <img src="/assets/images/logo.png" alt="ArchiveMint Explorer" class="title-image">
-      </a>
-      <nav class="nav-buttons">
-        <a [routerLink]="['/blocks']" class="nav-btn">Main Menu</a>
-        <a [routerLink]="['/wallets']" class="nav-btn">Wallet Balances</a>
-        <a [routerLink]="['/storedFiles']" class="nav-btn">Stored Files</a>
-        <a [routerLink]="['/storageContracts']" class="nav-btn">Storage Contracts</a>
-      </nav>
-    </header>
+    <div class="app-container">
+      <header class="toolbar">
+        <a [routerLink]="['/blocks']" class="title-link">
+          <img src="/assets/images/logo.png" alt="ArchiveMint Explorer" class="title-image">
+        </a>
+        <nav class="nav-buttons">
+          <a [routerLink]="['/blocks']" class="nav-btn">Main Menu</a>
+          <a [routerLink]="['/wallets']" class="nav-btn">Wallet Balances</a>
+          <a [routerLink]="['/storedFiles']" class="nav-btn">Stored Files</a>
+          <a [routerLink]="['/storageContracts']" class="nav-btn">Storage Contracts</a>
+        </nav>
+      </header>
 
-    <main class="content">
-      <router-outlet></router-outlet>
-    </main>
+      <main class="content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+    <app-personal-photo></app-personal-photo> <!-- Add photo component here -->
+    <app-footer></app-footer>
   `,
   styles: [`
     :host {
@@ -149,6 +157,10 @@ import { RouterLink, RouterOutlet } from '@angular/router';
         padding: 0.75rem;
         margin: 1rem auto;
       }
+    }
+
+    .app-container {
+      /* No min-height needed */
     }
   `]
 })
