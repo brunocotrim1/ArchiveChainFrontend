@@ -412,9 +412,11 @@ export class StorageContractsComponent implements OnInit {
   // New method to format fileUrl into dateTime and fileName
   formatFileDateTime(fileUrl: string): { dateTime: string, fileName: string } {
     const fileName = this.extractFilename(fileUrl);
-    const timestampMatch = fileName.match(/^(\d{14})/);
+    const timestampMatch = fileUrl.split('/')[0];
+    console.log('Timestamp match:', timestampMatch);
+    console.log('File name:', fileUrl);
     if (timestampMatch) {
-      const timestamp = timestampMatch[1];
+      const timestamp = timestampMatch;
       const year = timestamp.slice(0, 4);
       const month = timestamp.slice(4, 6);
       const day = timestamp.slice(6, 8);
