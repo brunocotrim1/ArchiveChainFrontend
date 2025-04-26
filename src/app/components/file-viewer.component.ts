@@ -239,9 +239,8 @@ export class FileViewerComponent implements OnInit {
 
   private async fetchFile() {
     try {
-      const url = `storage/retrieveFile?filename=${encodeURIComponent(this.fileName)}`;
-      this.originalUrl = window.location.origin + '/' + url;
-      console.log('Fetching file from:', url);
+      const url = `http://85.245.113.27:8085/storage/retrieveFile?filename=${this.fileName}`;
+
       const response = await this.http.get(url, {
         responseType: 'blob',
         observe: 'response'
@@ -257,7 +256,6 @@ export class FileViewerComponent implements OnInit {
         this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.blobUrl);
 
         this.determineDisplayType(contentType);
-
         if (this.isText) {
           this.fileContent = await blob.text();
         }
@@ -266,6 +264,8 @@ export class FileViewerComponent implements OnInit {
       this.error = 'Error loading file: ' + (error instanceof Error ? error.message : 'Unknown error');
     } finally {
       this.isLoading = false;
+      console.log(this.isLoading);
+      console.log(this.error);
     }
   }
 
@@ -295,6 +295,7 @@ export class FileViewerComponent implements OnInit {
   }
 
   downloadFile() {
+  
     if (this.blobUrl) {
       const link = document.createElement('a');
       link.href = this.blobUrl;

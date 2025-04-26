@@ -392,9 +392,7 @@ export class StorageContractsComponent implements OnInit {
   }
 
   private extractFilename(fileUrl: string): string {
-    const parts = fileUrl.split('/');
-    console.log('Extracted parts:', parts);
-    return parts.slice(1).join('/') || fileUrl;
+    return fileUrl
   }
 
   formatFileLength(bytes: number): string {

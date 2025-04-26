@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { FormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -12,6 +12,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 
 // Dialog Component
 @Component({
@@ -196,7 +197,7 @@ export class StorersDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: { title: string, storers: string[], fileUrl: string },
     private router: Router,
     private blockchainService: MockBlockchainService,
-    private dialogRef: MatDialogRef<StorersDialogComponent> // Inject MatDialogRef
+    private dialogRef: MatDialogRef<StorersDialogComponent>
   ) {}
 
   navigateToWallet(storer: string) {
@@ -210,7 +211,7 @@ export class StorersDialogComponent {
         this.router.navigate(['/storageContractDetails'], {
           queryParams: { contractHash, fileUrl: this.data.fileUrl }
         });
-        this.dialogRef.close(); // Close the dialog after navigation
+        this.dialogRef.close();
       } else {
         console.warn(`No contract hash found for storer ${storer} and file ${this.data.fileUrl}`);
       }
@@ -233,7 +234,8 @@ export class StorersDialogComponent {
     MatNativeDateModule,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSelectModule
   ],
   selector: 'app-stored-files',
   template: `
@@ -248,8 +250,8 @@ export class StorersDialogComponent {
               <mat-label>Search Files</mat-label>
               <input matInput 
                      [(ngModel)]="searchTerm" 
-                     (ngModelChange)="applyFilters()"
-                     placeholder="Enter file name...">
+                     (keydown.enter)="onSearchEnter()"
+                     placeholder="Enter file name and press Enter...">
             </mat-form-field>
           </div>
           <div *ngIf="filteredFiles.length > 0; else noFilesFound">
@@ -281,6 +283,23 @@ export class StorersDialogComponent {
               <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
               <mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row"></mat-row>
             </mat-table>
+            <div class="pagination-section">
+              <mat-form-field appearance="outline" class="page-size-selector">
+                <mat-label>Items per page</mat-label>
+                <mat-select [(value)]="pageSize" (selectionChange)="onPageSizeChange($event.value)">
+                  <mat-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div class="page-navigator">
+                <button mat-raised-button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+                  Previous
+                </button>
+                <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+                <button mat-raised-button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
           <ng-template #noFilesFound>
             <p class="no-files">No stored files found.</p>
@@ -386,6 +405,38 @@ export class StorersDialogComponent {
       color: #cccccc;
     }
 
+    .pagination-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .page-size-selector {
+      width: 150px;
+    }
+
+    .page-navigator {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-info {
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    mat-raised-button {
+      background: #2F855A;
+      color: #FFFFFF;
+    }
+
+    mat-raised-button[disabled] {
+      background: #cccccc;
+      color: #666;
+    }
+
     @media (min-width: 768px) {
       :host {
         padding: 2rem;
@@ -416,13 +467,40 @@ export class StoredFilesComponent implements OnInit {
   private blockchainService = inject(MockBlockchainService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute);
 
-  async ngOnInit() {
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalItems: number = 0;
+  totalPages: number = 1;
+  pageSizeOptions: number[] = [5, 10, 25, 50, 100, 1000, 10000];
+
+  ngOnInit() {
+    // Subscribe to query params to handle page, pageSize, and fileName from URL
+    this.route.queryParams.subscribe(params => {
+      this.currentPage = parseInt(params['page']) || 1;
+      this.pageSize = parseInt(params['pageSize']) || 10;
+      this.searchTerm = params['fileName'] || ''; // Set searchTerm from URL
+      this.loadFiles();
+    });
+  }
+
+  async loadFiles() {
     try {
-      const rawFiles = await this.blockchainService.getStoredFiles() ?? [];
+      const offset = (this.currentPage - 1) * this.pageSize;
+      // Pass searchTerm as fileName to the service
+      var page = encodeURIComponent(this.searchTerm);
+
+      const rawFiles = await this.blockchainService.getStoredFiles(offset, this.pageSize, page) ?? [];
+      console.log('Fetched files:', rawFiles);
+      // Get total count for pagination
+      const totalString = await this.blockchainService.getTotalAmountOfFiles();
+      this.totalItems = parseInt(totalString) || 0;
+      this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+
       this.files = await Promise.all(rawFiles.map(async file => {
         const storers = await this.blockchainService.getStorersOfFile(file);
-        console.log(`File: ${file}, Storers:`, storers);
         return {
           originalName: file,
           ...this.formatFileName(file),
@@ -430,8 +508,7 @@ export class StoredFilesComponent implements OnInit {
           storers: storers
         };
       }));
-      this.filteredFiles = [...this.files];
-      console.log('Filtered Files:', this.filteredFiles);
+      this.applyFilters();
     } catch (error) {
       console.error('Error fetching stored files:', error);
       this.files = [];
@@ -440,11 +517,22 @@ export class StoredFilesComponent implements OnInit {
   }
 
   applyFilters() {
-    this.filteredFiles = this.files.filter(file =>
-      file.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      file.dateTime.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
+    // Update filteredFiles with fetched results (no client-side filtering)
+    this.filteredFiles = [...this.files];
     if (this.table) this.table.renderRows();
+  }
+
+  onSearchEnter() {
+    // Navigate to the route with page=1, pageSize, and fileName
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: 1,
+        pageSize: this.pageSize,
+        fileName: this.searchTerm.trim() || null // Remove fileName if empty
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   sortByDate() {
@@ -457,10 +545,42 @@ export class StoredFilesComponent implements OnInit {
     if (this.table) this.table.renderRows();
   }
 
-  onRowClick(row: any) {
-    this.router.navigate(['/file-viewer'], {
-      queryParams: { filename: row.originalName },
-      state: { returnUrl: '/storedFiles' }
+  openStorersDialog(row: any, event: MouseEvent) {
+    event.stopPropagation();
+    this.dialog.open(StorersDialogComponent, {
+      width: '600px',
+      data: {
+        title: row.title,
+        storers: row.storers,
+        fileUrl: row.originalName
+      }
+    });
+  }
+
+  goToPage(page: number) {
+    this.currentPage = page;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        fileName: this.searchTerm.trim() || null // Preserve search term
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  onPageSizeChange(newSize: number) {
+    this.pageSize = newSize;
+    this.currentPage = 1;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        fileName: this.searchTerm.trim() || null // Preserve search term
+      },
+      queryParamsHandling: 'merge'
     });
   }
 
@@ -469,19 +589,6 @@ export class StoredFilesComponent implements OnInit {
     this.router.navigate(['/file-viewer'], {
       queryParams: { filename: row.originalName },
       state: { returnUrl: '/storedFiles' }
-    });
-  }
-
-  openStorersDialog(row: any, event: MouseEvent) {
-    event.stopPropagation();
-    console.log('Opening dialog for:', row);
-    this.dialog.open(StorersDialogComponent, {
-      width: '600px',
-      data: {
-        title: row.title,
-        storers: row.storers,
-        fileUrl: row.originalName
-      }
     });
   }
 

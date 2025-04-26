@@ -13,8 +13,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { StorageContractDetailsComponent } from './app/components/storage-contract-details.component';
 import { FileViewerComponent } from './app/components/file-viewer.component';
 import { WalletDetailsComponent } from './app/components/wallet-details.component';
+import { LandingPageComponent } from './app/components/landing.component';
 const routes: Routes = [
-  { path: '', redirectTo: '/blocks', pathMatch: 'full' },
+  { path: '', redirectTo: '/landing', pathMatch: 'full' },
+  {path: 'landing', component: LandingPageComponent},
   { path: 'blocks', component: BlocksComponent },
   { path: 'blocks/:height', component: BlockDetailsComponent },
   { path: 'transactions/:id', component: TransactionDetailsComponent },

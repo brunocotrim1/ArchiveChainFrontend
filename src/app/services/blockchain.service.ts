@@ -60,9 +60,9 @@ export class MockBlockchainService extends BlockchainService {
     }
   }
 
-  async getStoredFiles(): Promise<string[]> {
+  async getStoredFiles(offset: number = 0, limit: number = 10,fileName: string =''): Promise<string[]> {
     try {
-      const response = await this.http.get<string[]>(`${this.backendUrl}/explorer/storedFiles`).toPromise();
+      const response = await this.http.get<string[]>(`${this.backendUrl}/explorer/storedFiles`,{ params: { offset: offset.toString(), limit: limit.toString(),fileName: fileName } }).toPromise();
       return response ?? [];
     } catch (error) {
       console.error('Error fetching stored files:', error);

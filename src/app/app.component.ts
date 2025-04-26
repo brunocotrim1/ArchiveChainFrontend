@@ -17,8 +17,8 @@ import { PersonalPhotoComponent } from './components/personal-photo.component'; 
   template: `
     <div class="app-container">
       <header class="toolbar">
-        <a [routerLink]="['/blocks']" class="title-link">
-          <img src="/assets/images/logo.png" alt="ArchiveMint Explorer" class="title-image">
+        <a [routerLink]="['/landing']" class="title-link">
+          <img src="/assets/images/logo.png" alt="ArchiveChain Explorer" class="title-image">
         </a>
         <nav class="nav-buttons">
           <a [routerLink]="['/blocks']" class="nav-btn">Main Menu</a>

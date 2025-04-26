@@ -31,7 +31,7 @@ import { DatePipe } from '@angular/common';
   template: `
     <mat-card class="wallet-details-card">
       <mat-card-header class="header">
-        <mat-card-title>Wallet Details</mat-card-title>
+        <mat-card-title>Wallet Details Information of the last 1000 blocks</mat-card-title>
         <mat-card-subtitle>Address: {{ walletDetails?.address || 'Loading...' }}</mat-card-subtitle>
       </mat-card-header>
 
@@ -60,7 +60,7 @@ import { DatePipe } from '@angular/common';
 
             <!-- Storage Contracts -->
             <mat-divider class="divider"></mat-divider>
-            <h3 class="section-title">Storage Contracts ({{ walletDetails.storageContracts.length }})</h3>
+            <h3 class="section-title">Storage Contracts ({{ walletDetails.storageContracts.length }}) </h3>
             <div class="contracts-container" *ngIf="walletDetails.storageContracts.length > 0; else noContracts">
               <mat-table [dataSource]="walletDetails.storageContracts">
                 <ng-container matColumnDef="fileUrl">

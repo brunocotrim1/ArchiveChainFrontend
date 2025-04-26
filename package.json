@@ -20,6 +20,8 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.2",
+    "@ngx-translate/core": "^16.0.4",
+    "@ngx-translate/http-loader": "^16.0.1",
     "@swimlane/ngx-graph": "^10.0.0-alpha.0",
     "chart.js": "^4.4.8",
     "chartjs-plugin-zoom": "^2.2.0",
