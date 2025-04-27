@@ -239,8 +239,8 @@ export class FileViewerComponent implements OnInit {
 
   private async fetchFile() {
     try {
-      const url = `http://85.245.113.27:8085/storage/retrieveFile?filename=${this.fileName}`;
-
+      const url = `http://85.245.113.27:8085/storage/retrieveFile?filename=${encodeURIComponent(this.fileName)}`;
+      console.log('Fetching file from URL:', url);
       const response = await this.http.get(url, {
         responseType: 'blob',
         observe: 'response'
