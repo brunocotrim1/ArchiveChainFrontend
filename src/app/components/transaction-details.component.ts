@@ -526,7 +526,6 @@ export class TransactionDetailsComponent implements OnInit {
   }
 
   private extractFilename(fileUrl: string): string {
-    const parts = fileUrl.split('/');
-    return parts[parts.length - 1] || fileUrl;
+    return fileUrl
   }
 }

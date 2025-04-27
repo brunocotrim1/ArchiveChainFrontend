@@ -543,8 +543,9 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   }
 
   formatFileName(fileName: string): string {
+    fileName = decodeURIComponent(fileName);
     const timestampMatch = fileName.match(/^(\d{14})/);
-    const displayName = timestampMatch ? fileName.slice(15) : fileName;
+    const displayName = timestampMatch ? fileName.slice(15,86) : fileName;
     return displayName;
   }
 

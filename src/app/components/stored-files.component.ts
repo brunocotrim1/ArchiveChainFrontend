@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { query } from '@angular/animations';
 
 // Dialog Component
 @Component({
@@ -442,8 +443,7 @@ export class StorersDialogComponent {
         padding: 2rem;
       }
       .explorer-container {
-        gap: 1.5rem;
-        max-width: 1400px;
+        max-width: 90%;
       }
       .stored-files-card {
         padding: 1.5rem;
@@ -565,8 +565,8 @@ export class StoredFilesComponent implements OnInit {
         page: this.currentPage,
         pageSize: this.pageSize,
         fileName: this.searchTerm.trim() || null // Preserve search term
-      },
-      queryParamsHandling: 'merge'
+      },state: { returnUrl: this.router.url },
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -586,9 +586,10 @@ export class StoredFilesComponent implements OnInit {
 
   onTitleClick(event: MouseEvent, row: any) {
     event.stopPropagation();
+    const currentQueryParams = this.router.routerState.snapshot.root.queryParams;
     this.router.navigate(['/file-viewer'], {
       queryParams: { filename: row.originalName },
-      state: { returnUrl: '/storedFiles' }
+      state: { returnUrl: this.router.url.split('?')[0], queryParams: currentQueryParams }
     });
   }
 

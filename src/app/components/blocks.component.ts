@@ -40,7 +40,7 @@ import { Block } from '../models/interface';
     }
     @media (min-width: 768px) {
       :host { padding: 2rem; }
-      .explorer-container { gap: 1.5rem; max-width: 1400px; }
+      .explorer-container { gap: 1.5rem; max-width: 90%; }
     }
   `]
 })

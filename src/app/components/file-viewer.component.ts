@@ -285,7 +285,10 @@ export class FileViewerComponent implements OnInit {
   goBack() {
     const navigationState = history.state;
     const returnUrl = navigationState?.returnUrl || '/storedFiles';
-    this.router.navigate([returnUrl]);
+    console.log('Navigating to:', navigationState.returnUrl);
+    const queryParams = navigationState?.queryParams || {};
+    console.log('Query params:', queryParams);
+    this.router.navigate([returnUrl],{ queryParams});
   }
 
   openInNewTab() {

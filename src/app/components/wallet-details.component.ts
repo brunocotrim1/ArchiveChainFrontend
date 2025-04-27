@@ -177,7 +177,7 @@ import { DatePipe } from '@angular/common';
     }
 
     .wallet-details-card {
-      max-width: 1200px;
+      max-width: 90%;
       margin: 1rem auto;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       border-radius: 8px;
@@ -532,7 +532,11 @@ export class WalletDetailsComponent implements OnInit {
 
   navigateToFileViewer(fileUrl: string) {
     const filename = this.extractFilename(fileUrl);
-    this.router.navigate(['/file-viewer'], { queryParams: { filename } });
+    this.router.navigate(['/file-viewer'], {
+      queryParams: { filename },
+      state: { returnUrl: this.router.url }
+    });
+    
   }
 
   navigateToContract(contract: StorageContract) {
@@ -543,7 +547,7 @@ export class WalletDetailsComponent implements OnInit {
   }
 
   extractFilename(fileUrl: string): string {
-    return fileUrl.split('/').slice(1).join('/') || fileUrl;
+    return fileUrl
   }
 
   private convertBase64ToHex(base64Str: string): string {

@@ -289,7 +289,7 @@ import { StorageContract } from '../models/interface';
 
     @media (min-width: 768px) {
       :host { padding: 1rem; }
-      .contracts-container { max-width: 1400px; }
+      .contracts-container { max-width: 100%; }
       .content-wrapper { padding: 1rem; }
       .contracts-list { padding: 1rem; }
       mat-header-cell, mat-cell { font-size: 0.9rem; }

@@ -56,7 +56,7 @@ import { Block, Transaction } from '../models/interface';
             <div class="detail-item">
               <span class="label">Winning Filename</span>
               <a class="value filename-link" (click)="navigateToFileViewer($event, block.posProof.winningFilename)">
-                {{ block.posProof.winningFilename }}
+                {{ extractFilename(block.posProof.winningFilename) }}
               </a>
             </div>
             <div class="detail-item">
@@ -488,6 +488,6 @@ export class BlockDetailsComponent implements OnInit {
   }
 
   extractFilename(fileUrl: string): string {
-    return fileUrl.split('/').pop() || fileUrl;
+    return decodeURIComponent(fileUrl);
   }
 }

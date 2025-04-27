@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { FooterComponent } from './components/footer.component';
 import { PersonalPhotoComponent } from './components/personal-photo.component'; // Adjust path if needed
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,8 @@ import { PersonalPhotoComponent } from './components/personal-photo.component'; 
           <img src="/assets/images/logo.png" alt="ArchiveChain Explorer" class="title-image">
         </a>
         <nav class="nav-buttons">
-          <a [routerLink]="['/blocks']" class="nav-btn">Main Menu</a>
+          <a [routerLink]="['/landing']" class="nav-btn">Main Page</a>
+          <a [routerLink]="['/blocks']" class="nav-btn">Blockchain State</a>
           <a [routerLink]="['/wallets']" class="nav-btn">Wallet Balances</a>
           <a [routerLink]="['/storedFiles']" class="nav-btn">Stored Files</a>
           <a [routerLink]="['/storageContracts']" class="nav-btn">Storage Contracts</a>
@@ -103,7 +105,7 @@ import { PersonalPhotoComponent } from './components/personal-photo.component'; 
 
     .content {
       padding: 1.5rem;
-      max-width: 1400px;
+      max-width: 90%;
       margin: 2rem auto;
       background: #FFFFFF;
       border-radius: 6px;
@@ -164,4 +166,16 @@ import { PersonalPhotoComponent } from './components/personal-photo.component'; 
     }
   `]
 })
-export class AppComponent {}
+export class AppComponent implements OnInit {
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    // Subscribe to Router events to listen for navigation end
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd) // Only listen for NavigationEnd events
+    ).subscribe(() => {
+      // Scroll to the top of the page after navigation
+      window.scrollTo(0, 0);
+    });
+  }
+}

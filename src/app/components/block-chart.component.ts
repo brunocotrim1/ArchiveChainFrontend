@@ -213,7 +213,7 @@ export class BlockChartComponent implements OnInit {
 
   // Interval controls
   intervalValue: number = 5;
-  selectedTimescale: number = 60 * 1000;
+  selectedTimescale: number = 1000;
   timescales = [
     { label: 'Seconds', value: 1000 },
     { label: 'Minutes', value: 60 * 1000 },

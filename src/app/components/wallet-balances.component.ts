@@ -283,7 +283,7 @@ import { WalletBalance } from '../models/interface';
 
     @media (min-width: 768px) {
       :host { padding: 1rem; }
-      .participant-container { max-width: 1400px; }
+      .participant-container { max-width: 90%; }
       .content-wrapper { padding: 1rem; }
       .participant-list { padding: 1rem; }
       th, td { font-size: 0.9rem; }
