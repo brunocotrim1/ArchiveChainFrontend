@@ -552,7 +552,7 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   navigateToFileViewer(event: Event, fileUrl: string) {
     event.stopPropagation();
     console.log('Navigating to file viewer with URL:', fileUrl);
-    const filename = fileUrl;
+    const filename = decodeURIComponent(fileUrl);
     this.router.navigate(['/file-viewer'], {
       queryParams: { filename },
       state: { returnUrl: '/blocks' }
@@ -560,6 +560,7 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   }
 
   extractFilename(fileUrl: string): string {
+
     return fileUrl.split('/').pop() || fileUrl;
   }
 }
