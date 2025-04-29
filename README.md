@@ -57,22 +57,57 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```markdown
+# 🚀 Deploying Angular App with Nginx and HTTPS (Let's Encrypt)
 
+This guide walks through deploying an Angular app with a production build, served by Nginx and secured with Let's Encrypt SSL.
 
-HTTPS CONFIG~
-# 1. Update and install nginx
+---
+
+## ✅ Prerequisites
+- Ubuntu server with root/sudo access
+- Domain name pointing to your server (`archivechain.pt`)
+- Angular project ready for build
+
+---
+
+## 🛠️ Steps
+
+### 1. Update & Install Nginx
+
+```bash
 sudo apt update
 sudo apt install nginx
+```
 
-# 2. Build Angular app
+---
+
+### 2. Build Angular App for Production
+
+```bash
 ng build --configuration production
+```
 
-# 3. Copy built files to web root
+---
+
+### 3. Copy Build Output to Web Root
+
+```bash
 sudo mkdir -p /var/www/archivechain.pt/html
 sudo cp -r dist/archive-mint-frontend/* /var/www/archivechain.pt/html
+```
 
-# 4. Create Nginx config
+---
+
+### 4. Set Up Nginx Configuration
+
+```bash
 sudo nano /etc/nginx/sites-available/archivechain.pt
+```
+
+Paste the following into the file:
+
+```nginx
 # Redirect HTTP to HTTPS
 server {
     listen 80;
@@ -109,15 +144,39 @@ server {
         try_files $uri $uri/ /index.html;
     }
 }
-# 5. Obtain SSL certificate (already done, but included for completeness)
+```
+
+---
+
+### 5. Set Up SSL with Certbot (if not already done)
+
+```bash
+sudo mkdir -p /var/www/certbot
 sudo certbot certonly --webroot -w /var/www/certbot -d archivechain.pt
+```
 
-# 6. Enable site
+---
+
+### 6. Enable Nginx Site
+
+```bash
 sudo ln -s /etc/nginx/sites-available/archivechain.pt /etc/nginx/sites-enabled/
+```
 
-# 7. Test and reload nginx
+---
+
+### 7. Test and Reload Nginx
+
+```bash
 sudo nginx -t
 sudo systemctl restart nginx
+```
 
-# 8. Test automatic renewal
+---
+
+### 8. Test Auto-Renewal of SSL Certificate
+
+```bash
 sudo certbot renew --dry-run
+```
+
