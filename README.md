@@ -145,7 +145,73 @@ server {
     }
 }
 ```
+```nginx MCBOOK
+# Main Nginx Configuration File
 
+# User and group directives (you can adjust if needed)
+user  nobody;
+
+# Number of worker processes
+worker_processes  1;
+
+# The 'events' block is necessary
+events {
+    worker_connections  1024;  # Adjust as needed
+}
+
+http {
+# HTTP server block (redirect HTTP to HTTPS)
+server {
+    listen 80;
+    server_name archivechain.pt;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /opt/homebrew/var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;  # Redirect HTTP to HTTPS
+    }
+}
+
+# HTTPS server block (proxy requests to Angular server)
+server {
+    listen 443 ssl;
+    server_name archivechain.pt;
+
+    # SSL settings
+    ssl_certificate /etc/letsencrypt/live/archivechain.pt/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/archivechain.pt/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /opt/homebrew/var/www/certbot;  # Used by Certbot for SSL cert verification
+    }
+
+    # Proxy requests to the Angular app running on localhost:4200
+    location / {
+        proxy_pass http://localhost:4200;  # Replace with the address of your Angular server
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+   location /storage/ {
+        proxy_pass http://85.245.113.27:8085;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+}
+
+
+```
 ---
 
 ### 5. Set Up SSL with Certbot (if not already done)
