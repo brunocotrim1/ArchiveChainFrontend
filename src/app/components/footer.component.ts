@@ -6,23 +6,26 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   selector: 'app-footer',
   template: `
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-row">
-          <span class="footer-text">This project contains information extracted from:</span>
-          <a href="https://arquivo.pt" target="_blank" class="footer-link">
-            <img src="/assets/images/arquivo-pt-logo.png" alt="Arquivo.pt" class="footer-logo">
-          </a>
-        </div>
-        <div class="footer-row">
-          <span class="footer-text">
-            Project developed in 2025 by 
-            <a href="https://www.linkedin.com/in/brunocotrim1/" target="_blank" class="name-link">Bruno Cotrim</a>, 
-            for the Arquivo.pt 2025 Award
-          </span>
-        </div>
-      </div>
-    </footer>
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-row">
+      <span class="footer-text">Este projeto contém informação extraída do:</span>
+      <a href="https://arquivo.pt" target="_blank" class="footer-link">
+        <img src="/assets/images/arquivo-pt-logo.png" alt="Arquivo.pt" class="footer-logo">
+      </a>
+    </div>
+    <div class="footer-row">
+      <span class="footer-text">
+        Projeto desenvolvido em 2025 por 
+        <a href="https://www.linkedin.com/in/brunocotrim1/" target="_blank" class="name-link">Bruno Cotrim</a>,  
+        <a href="https://www.di.fc.ul.pt/~blferreira/" target="_blank" class="name-link">Bernardo Ferreira</a>,
+        <a href="https://miguelmatos.me/" target="_blank" class="name-link">Miguel Matos</a>
+        para o Prémio Arquivo.pt 2025
+      </span>
+    </div>
+  </div>
+</footer>
+
   `,
   styles: [`
     .footer {

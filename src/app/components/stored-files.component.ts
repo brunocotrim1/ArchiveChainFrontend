@@ -243,12 +243,12 @@ export class StorersDialogComponent {
     <div class="explorer-container">
       <mat-card class="stored-files-card">
         <mat-card-header>
-          <mat-card-title>Stored Files</mat-card-title>
+          <mat-card-title>Páginas Armazenadas</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <div class="filter-section">
             <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search Files</mat-label>
+              <mat-label>Procurar Páginas</mat-label>
               <input matInput 
                      [(ngModel)]="searchTerm" 
                      (keydown.enter)="onSearchEnter()"
@@ -259,18 +259,18 @@ export class StorersDialogComponent {
             <mat-table [dataSource]="filteredFiles" class="files-table" #table>
               <ng-container matColumnDef="dateTime">
                 <mat-header-cell *matHeaderCellDef class="clickable-header" (click)="sortByDate()">
-                  Date & Time {{ isAscending ? '(Desc ↓)' : '(Asc ↑)' }}
+                  Data & Tempo {{ isAscending ? '(Desc ↓)' : '(Asc ↑)' }}
                 </mat-header-cell>
                 <mat-cell *matCellDef="let row">{{ row.dateTime }}</mat-cell>
               </ng-container>
               <ng-container matColumnDef="title">
-                <mat-header-cell *matHeaderCellDef>Title</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Página</mat-header-cell>
                 <mat-cell *matCellDef="let row">
                   <span class="url-link" (click)="onTitleClick($event, row)">{{ row.title }}</span>
                 </mat-cell>
               </ng-container>
               <ng-container matColumnDef="storerCount">
-                <mat-header-cell *matHeaderCellDef>Number of Storers</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Número de Armazenadores</mat-header-cell>
                 <mat-cell *matCellDef="let row">{{ row.storerCount }}</mat-cell>
               </ng-container>
               <ng-container matColumnDef="expand">

@@ -23,7 +23,7 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
   template: `
     <mat-card class="contract-details-card">
       <mat-card-header class="header">
-        <mat-card-title>Storage Contract Details</mat-card-title>
+        <mat-card-title>Detalhes do contrato de armazenamento</mat-card-title>
         <mat-card-subtitle>
           File URL: 
           <span class="clickable" (click)="navigateToFileViewer(storageContract?.fileUrl)">
@@ -37,13 +37,13 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
           <div class="details-container">
             <div class="detail-group">
               <div class="detail-item">
-                <span class="label">File URL</span>
+                <span class="label">URL do ficheiro</span>
                 <span class="value scrollable clickable" (click)="navigateToFileViewer(storageContract.fileUrl)">
                   {{ storageContract.fileUrl }}
                 </span>
               </div>
               <div class="detail-item">
-                <span class="label">Storer Address</span>
+                <span class="label">Endereço do armazenador</span>
                 <span class="value scrollable">{{ storageContract.storerAddress }}</span>
               </div>
               <div class="detail-item">
@@ -51,31 +51,31 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
                 <span class="value scrollable">{{ storageContract.merkleRoot }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Timestamp</span>
+                <span class="label">Data de armazenamento</span>
                 <span class="value">{{ storageContract.timestamp | date:'medium' }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Value</span>
+                <span class="label">Valor</span>
                 <span class="value">{{ storageContract.value }} Coins</span>
               </div>
               <div class="detail-item">
-                <span class="label">Proof Frequency</span>
+                <span class="label">Frequência de prova</span>
                 <span class="value">{{ storageContract.proofFrequency }} blocks</span>
               </div>
               <div class="detail-item">
-                <span class="label">Window Size</span>
+                <span class="label">Janela de prova</span>
                 <span class="value">{{ storageContract.windowSize }} blocks</span>
               </div>
               <div class="detail-item">
-                <span class="label">File Length</span>
+                <span class="label">Tamanho do ficheiro</span>
                 <span class="value">{{ formatFileLength(storageContract.fileLength) }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Storage Type</span>
+                <span class="label">Tipo de armazenamento</span>
                 <span class="value">{{ storageContract.storageType }}</span>
               </div>
               <div class="detail-item" *ngIf="storageContract.fccnSignature">
-                <span class="label">FCCN Signature</span>
+                <span class="label">Assinatura da FCCN</span>
                 <span class="value scrollable">{{ storageContract.fccnSignature }}</span>
               </div>
               <div class="detail-item" *ngIf="storageContract.storerSignature">
@@ -86,24 +86,24 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
 
             <mat-divider class="divider"></mat-divider>
 
-            <h3 class="section-title">File Proving Windows ({{ fileProvingWindows.length }})</h3>
+            <h3 class="section-title">Janelas de prova de armazenamento ({{ fileProvingWindows.length }})</h3>
             <div class="proving-windows-container">
               <div *ngIf="fileProvingWindows.length > 0; else noWindows" class="proving-windows-list">
                 <div *ngFor="let window of fileProvingWindows" class="proving-window-item" [ngClass]="window.state.toLowerCase()">
                   <div class="window-detail">
-                    <span class="label">PoDP Challenge</span>
+                    <span class="label">Desafio PoDP</span>
                     <span class="value scrollable">{{ window.poDpChallenge }}</span>
                   </div>
                   <div class="window-detail">
-                    <span class="label">Start Block Index</span>
+                    <span class="label">Índice Bloco de começo</span>
                     <span class="value">{{ window.startBlockIndex }}</span>
                   </div>
                   <div class="window-detail">
-                    <span class="label">End Block Index</span>
+                    <span class="label">Índice Bloco de fim</span>
                     <span class="value">{{ window.endBlockIndex }}</span>
                   </div>
                   <div class="window-detail">
-                    <span class="label">State</span>
+                    <span class="label">Estado</span>
                     <span class="value">{{ window.state }}</span>
                   </div>
                 </div>

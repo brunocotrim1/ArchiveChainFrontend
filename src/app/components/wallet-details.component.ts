@@ -31,8 +31,8 @@ import { DatePipe } from '@angular/common';
   template: `
     <mat-card class="wallet-details-card">
       <mat-card-header class="header">
-        <mat-card-title>Wallet Details Information of the last 1000 blocks</mat-card-title>
-        <mat-card-subtitle>Address: {{ walletDetails?.address || 'Loading...' }}</mat-card-subtitle>
+        <mat-card-title>Detalhes da carteira - Informações dos últimos 1000 blocos</mat-card-title>
+        <mat-card-subtitle>Endereço: {{ walletDetails?.address || 'Loading...' }}</mat-card-subtitle>
       </mat-card-header>
 
       <mat-card-content class="content">
@@ -45,40 +45,40 @@ import { DatePipe } from '@angular/common';
                 <span class="value scrollable">{{ walletDetails.address }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Public Key</span>
+                <span class="label">Chave pública</span>
                 <span class="value scrollable">{{ walletDetails.publicKey }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Balance</span>
+                <span class="label">Saldo</span>
                 <span class="value">{{ walletDetails.balance }} Coins</span>
               </div>
               <div class="detail-item">
-                <span class="label">Total Storage</span>
+                <span class="label">Armazenamento Utilizado</span>
                 <span class="value">{{ formatStorage(totalStorage) }}</span>
               </div>
             </div>
 
             <!-- Storage Contracts -->
             <mat-divider class="divider"></mat-divider>
-            <h3 class="section-title">Storage Contracts ({{ walletDetails.storageContracts.length }}) </h3>
+            <h3 class="section-title">Contratos de armazenamento ({{ walletDetails.storageContracts.length }}) </h3>
             <div class="contracts-container" *ngIf="walletDetails.storageContracts.length > 0; else noContracts">
               <mat-table [dataSource]="walletDetails.storageContracts">
                 <ng-container matColumnDef="fileUrl">
-                  <mat-header-cell *matHeaderCellDef>File</mat-header-cell>
+                  <mat-header-cell *matHeaderCellDef>Ficheiro</mat-header-cell>
                   <mat-cell *matCellDef="let contract" class="clickable" (click)="navigateToFileViewer(contract.fileUrl)">
                     {{ extractFilename(contract.fileUrl) }}
                   </mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="storerAddress">
-                  <mat-header-cell *matHeaderCellDef>Storer Address</mat-header-cell>
+                  <mat-header-cell *matHeaderCellDef>Participante</mat-header-cell>
                   <mat-cell *matCellDef="let contract">{{ contract.storerAddress }}</mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="value">
-                  <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+                  <mat-header-cell *matHeaderCellDef>Valor</mat-header-cell>
                   <mat-cell *matCellDef="let contract">{{ contract.value }} Coins</mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="timestamp">
-                  <mat-header-cell *matHeaderCellDef>Timestamp</mat-header-cell>
+                  <mat-header-cell *matHeaderCellDef>Data de arquivo</mat-header-cell>
                   <mat-cell *matCellDef="let contract">{{ contract.timestamp | date:'MMM d, yyyy, h:mm:ss a' }}</mat-cell>
                 </ng-container>
                 <mat-header-row *matHeaderRowDef="contractColumns"></mat-header-row>
@@ -94,7 +94,7 @@ import { DatePipe } from '@angular/common';
 
             <!-- Won Blocks -->
             <mat-divider class="divider"></mat-divider>
-            <h3 class="section-title">Won Blocks ({{ walletDetails.wonBlocks.length }})</h3>
+            <h3 class="section-title">Blocos vencidos ({{ walletDetails.wonBlocks.length }})</h3>
             <div class="won-blocks-container">
               <div *ngIf="walletDetails.wonBlocks.length > 0; else noBlocks" class="blocks-grid">
                 <div *ngFor="let block of walletDetails.wonBlocks" class="block-item clickable" (click)="navigateToBlock(block)">
@@ -112,11 +112,11 @@ import { DatePipe } from '@angular/common';
 
             <!-- Transactions -->
             <mat-divider class="divider"></mat-divider>
-            <h3 class="section-title">Transactions ({{ walletDetails.transactions.length }})</h3>
+            <h3 class="section-title">Transações ({{ walletDetails.transactions.length }})</h3>
             <div class="transactions-container" *ngIf="walletDetails.transactions.length > 0; else noTransactions">
               <mat-table [dataSource]="walletDetails.transactions">
                 <ng-container matColumnDef="type">
-                  <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
+                  <mat-header-cell *matHeaderCellDef>Tipo</mat-header-cell>
                   <mat-cell *matCellDef="let tx">{{ tx.type }}</mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="transactionId">
@@ -126,7 +126,7 @@ import { DatePipe } from '@angular/common';
                   </mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="details">
-                  <mat-header-cell *matHeaderCellDef>Details</mat-header-cell>
+                  <mat-header-cell *matHeaderCellDef>Detalhes</mat-header-cell>
                   <mat-cell *matCellDef="let tx">
                     <ng-container [ngSwitch]="tx.type">
                       <ng-container *ngSwitchCase="'CURRENCY_TRANSACTION'">

@@ -32,13 +32,13 @@ import { Block, Transaction } from '../models/interface';
     <mat-card class="block-details-card">
       <ng-container *ngIf="block; else blockNotFound">
         <mat-card-header class="header">
-          <mat-card-title>Block Details</mat-card-title>
-          <mat-card-subtitle>Height {{ block?.height }}</mat-card-subtitle>
+          <mat-card-title>Detalhes do bloco</mat-card-title>
+          <mat-card-subtitle>Altura {{ block?.height }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="content">
           <div *ngIf="block" class="details-grid">
             <div class="detail-item">
-              <span class="label">Height</span>
+              <span class="label">Altura</span>
               <span class="value">{{ block.height }}</span>
             </div>
             <div class="detail-item">
@@ -46,29 +46,29 @@ import { Block, Transaction } from '../models/interface';
               <span class="value">{{ block.hash }}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Previous Hash</span>
+              <span class="label">Hash anterior</span>
               <span class="value">{{ block.previousHash || 'None' }}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Timestamp</span>
+              <span class="label">Data</span>
               <span class="value">{{ block.timeStamp }}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Winning Filename</span>
+              <span class="label">Página Vencedora</span>
               <a class="value filename-link" (click)="navigateToFileViewer($event, block.posProof.winningFilename)">
                 {{ extractFilename(block.posProof.winningFilename) }}
               </a>
             </div>
             <div class="detail-item">
-              <span class="label">Signature</span>
+              <span class="label">Assinatura</span>
               <span class="value">{{ block.signature }}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Miner Public Key</span>
+              <span class="label">Chave pública do minerador</span>
               <span class="value">{{ block.minerPublicKey }}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Quality</span>
+              <span class="label">Qualidade</span>
               <span class="value">{{ block.quality }}</span>
             </div>
           </div>
@@ -76,7 +76,7 @@ import { Block, Transaction } from '../models/interface';
           <!-- PoS Proof Section -->
           <mat-expansion-panel *ngIf="block" class="proof-panel">
             <mat-expansion-panel-header>
-              <mat-panel-title>Proof of Space (PoS)</mat-panel-title>
+              <mat-panel-title>Prova de espaço (PoS)</mat-panel-title>
             </mat-expansion-panel-header>
             <div class="proof-content">
               <div class="detail-item">
@@ -101,7 +101,7 @@ import { Block, Transaction } from '../models/interface';
           <!-- PoT Proof Section -->
           <mat-expansion-panel *ngIf="block" class="proof-panel">
             <mat-expansion-panel-header>
-              <mat-panel-title>Proof of Time (PoT)</mat-panel-title>
+              <mat-panel-title>Prova de Tempo (PoT)</mat-panel-title>
             </mat-expansion-panel-header>
             <div class="proof-content">
               <div class="detail-item">
@@ -128,7 +128,7 @@ import { Block, Transaction } from '../models/interface';
           </mat-expansion-panel>
 
           <mat-divider *ngIf="block" class="divider"></mat-divider>
-          <h3 *ngIf="block" class="transactions-title">Transactions ({{ block.transactions.length }})</h3>
+          <h3 *ngIf="block" class="transactions-title">Transações ({{ block.transactions.length }})</h3>
           <div *ngIf="block && block.transactions && block.transactions.length > 0; else noTransactions" class="transactions-container">
             <div class="transactions-list">
               <div 

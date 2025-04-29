@@ -11,23 +11,23 @@ import { MatIconModule } from '@angular/material/icon';
     <mat-card class="status-bar">
       <div class="status-item">
         <mat-icon>height</mat-icon>
-        <span>Latest Block: <strong>{{ latestBlockHeight || 'N/A' }}</strong></span>
+        <span>Último Bloco: <strong>{{ latestBlockHeight || 'N/A' }}</strong></span>
       </div>
       <div class="status-item">
         <mat-icon>storage</mat-icon>
-        <span>Archived Storage: <strong>{{ formatStorage(archivedStorage) }}</strong></span>
+        <span>Espaço Arquivado da rede: <strong>{{ formatStorage(archivedStorage) }}</strong></span>
       </div>
       <div class="status-item">
         <mat-icon>assignment</mat-icon>
-        <span>Total Contracts: <strong>{{ totalContracts }}M</strong></span>
+        <span>Contratos Totais: <strong>{{ totalContracts }}</strong></span>
       </div>
       <div class="status-item">
         <mat-icon>monetization_on</mat-icon>
-        <span>Total Coins: <strong>{{ totalCoins }}</strong></span>
+        <span>Moedas Totais: <strong>{{ totalCoins }}</strong></span>
       </div>
       <div class="status-item">
         <mat-icon>folder</mat-icon>
-        <span>Total Stored Files: <strong>{{ totalStoredFiles || 'N/A' }}M</strong></span>
+        <span>Ficheiros armazenados Totais: <strong>{{ totalStoredFiles || 'N/A' }}</strong></span>
       </div>
     </mat-card>
   `,
@@ -112,8 +112,8 @@ export class BlockStatusComponent {
 
   formatStorage(bytes: number): string {
     if (bytes <= 0) return '0 MB';
-    //const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const units = ['TB', 'TB', 'TB', 'TB', 'TB'];
+    const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    //const units = ['TB', 'TB', 'TB', 'TB', 'TB'];
     let value = bytes;
     let unitIndex = 0;
     while (value >= 1000 && unitIndex < units.length - 1) {

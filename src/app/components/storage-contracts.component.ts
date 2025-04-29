@@ -26,8 +26,8 @@ import { StorageContract } from '../models/interface';
     <div class="contracts-container">
       <mat-card class="contracts-card">
         <mat-card-header class="header">
-          <mat-card-title>Storage Contracts</mat-card-title>
-          <mat-card-subtitle>Details of all active storage contracts</mat-card-subtitle>
+          <mat-card-title>Contratos de armazenamento</mat-card-title>
+          <mat-card-subtitle>Detalhes para todos os contratos de armazenamento ativos</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="content-wrapper">
           <div *ngIf="isLoading && mockContracts.length === 0" class="loading">
@@ -37,7 +37,7 @@ import { StorageContract } from '../models/interface';
             <mat-table [dataSource]="mockContracts" class="contracts-table">
               <!-- Date Column -->
               <ng-container matColumnDef="date">
-                <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Data coleta da página</mat-header-cell>
                 <mat-cell *matCellDef="let contract">
                   {{ formatFileDateTime(contract.fileUrl).dateTime }}
                 </mat-cell>
@@ -45,7 +45,7 @@ import { StorageContract } from '../models/interface';
 
               <!-- File Name Column -->
               <ng-container matColumnDef="fileName">
-                <mat-header-cell *matHeaderCellDef>File Name</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>URL página</mat-header-cell>
                 <mat-cell *matCellDef="let contract" [matTooltip]="contract.fileUrl">
                   <div class="scrollable-text clickable" (click)="navigateToFileViewer($event, contract.fileUrl)">
                     {{ formatFileDateTime(contract.fileUrl).fileName }}
@@ -54,7 +54,7 @@ import { StorageContract } from '../models/interface';
               </ng-container>
 
               <ng-container matColumnDef="storerAddress">
-                <mat-header-cell *matHeaderCellDef>Storer Address</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Armazenador</mat-header-cell>
                 <mat-cell *matCellDef="let contract" [matTooltip]="contract.storerAddress">
                   <div class="scrollable-text">{{ contract.storerAddress }}</div>
                 </mat-cell>
@@ -66,29 +66,29 @@ import { StorageContract } from '../models/interface';
                 </mat-cell>
               </ng-container>
               <ng-container matColumnDef="timestamp">
-                <mat-header-cell *matHeaderCellDef>Timestamp</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Data arquivo</mat-header-cell>
                 <mat-cell *matCellDef="let contract">
                   {{ contract.timestamp | date:'medium' }}
                 </mat-cell>
               </ng-container>
               <ng-container matColumnDef="value">
-                <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Valor</mat-header-cell>
                 <mat-cell *matCellDef="let contract">{{ contract.value }} Coins</mat-cell>
               </ng-container>
               <ng-container matColumnDef="proofFrequency">
-                <mat-header-cell *matHeaderCellDef>Proof Frequency</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Frequência de Prova</mat-header-cell>
                 <mat-cell *matCellDef="let contract">{{ contract.proofFrequency }} blocks</mat-cell>
               </ng-container>
               <ng-container matColumnDef="windowSize">
-                <mat-header-cell *matHeaderCellDef>Window Size</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Janela de Prova</mat-header-cell>
                 <mat-cell *matCellDef="let contract">{{ contract.windowSize }} blocks</mat-cell>
               </ng-container>
               <ng-container matColumnDef="fileLength">
-                <mat-header-cell *matHeaderCellDef>File Length</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Tamanho do Ficheiro</mat-header-cell>
                 <mat-cell *matCellDef="let contract">{{ formatFileLength(contract.fileLength) }}</mat-cell>
               </ng-container>
               <ng-container matColumnDef="storageType">
-                <mat-header-cell *matHeaderCellDef>Storage Type</mat-header-cell>
+                <mat-header-cell *matHeaderCellDef>Tipo de armazenamento</mat-header-cell>
                 <mat-cell *matCellDef="let contract">{{ contract.storageType }}</mat-cell>
               </ng-container>
               <mat-header-row *matHeaderRowDef="contractColumns"></mat-header-row>

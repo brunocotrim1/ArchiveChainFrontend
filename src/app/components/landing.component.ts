@@ -16,7 +16,7 @@ import { RouterModule } from '@angular/router';
 
       <!-- Seção de Descrição -->
       <div class="description-section">
-        <h1>Arquivando o Passado, Empoderando o Futuro</h1>
+        <h1>Arquivar o passado, impulsionar o futuro</h1>
         <p>
           Na era digital, preservar o conteúdo da web é essencial, mas as soluções atuais de blockchain, como o Bitcoin, consomem uma quantidade enorme de energia (164 TWh em 2024, três vezes o consumo de Portugal), contribuindo para a pegada de carbono. Outras, como o Chia, desperdiçam espaço em disco com dados inúteis. O ArchiveChain resolve este problema utilizando as páginas web do Arquivo.pt como prova de espaço útil, criando um blockchain sustentável que é 1000 vezes mais eficiente em termos energéticos do que o Bitcoin. Isto descentraliza o armazenamento, reduz os custos para o Arquivo.pt e recompensa os utilizadores com uma criptomoeda nativa por contribuírem com espaço em disco para arquivar a web, garantindo transparência e acessibilidade
         </p>
@@ -33,7 +33,7 @@ import { RouterModule } from '@angular/router';
         </div>
         <div class="option-column">
           <h2>Junte-se à Missão</h2>
-          <p>Contribua para preservar o patrimônio digital juntando-se à nossa comunidade a partir do código aberto no GitHub.</p>
+          <p>Contribua para preservar o património digital juntando-se à nossa comunidade a partir do código aberto no GitHub.</p>
           <a mat-raised-button color="accent" href="https://github.com/brunocotrim1/ArchiveChain" target="_blank">
             <img src="assets/images/github-logo.png" alt="GitHub Logo" class="github-logo"> Participe no GitHub
           </a>

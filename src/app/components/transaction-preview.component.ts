@@ -8,13 +8,13 @@ import { Transaction } from '../models/interface';
   selector: 'app-transaction-preview',
   template: `
     <div class="transaction-preview">
-      <p><span class="label">Type:</span> <span class="value">{{ transaction?.type ?? 'N/A' }}</span></p>
-      <p><span class="label">Transaction ID:</span> <span class="value">{{ transaction?.transactionId ?? 'tx-' + index }}</span></p>
+      <p><span class="label">Tipo:</span> <span class="value">{{ transaction?.type ?? 'N/A' }}</span></p>
+      <p><span class="label">ID Transação:</span> <span class="value">{{ transaction?.transactionId ?? 'tx-' + index }}</span></p>
       <div *ngIf="transaction?.type === 'CURRENCY_TRANSACTION'">
         <p><span class="label">Amount:</span> <span class="value">{{ transaction?.amount ?? 'N/A' }}</span></p>
       </div>
       <div *ngIf="transaction?.type === 'FILE_PROOF'">
-        <p><span class="label">File URL:</span> <span class="value">{{ transaction?.fileProof?.fileUrl ?? 'N/A' }}</span></p>
+        <p><span class="label">URL Página:</span> <span class="value">{{ transaction?.fileProof?.fileUrl ?? 'N/A' }}</span></p>
       </div>
       <div *ngIf="transaction?.type === 'STORAGE_CONTRACT_SUBMISSION'">
         <p><span class="label">Value:</span> <span class="value">{{ transaction?.contract?.value ?? 'N/A' }}</span></p>

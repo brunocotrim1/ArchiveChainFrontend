@@ -22,11 +22,11 @@ import { filter } from 'rxjs';
           <img src="/assets/images/logo.png" alt="ArchiveChain Explorer" class="title-image">
         </a>
         <nav class="nav-buttons">
-          <a [routerLink]="['/landing']" class="nav-btn">Main Page</a>
-          <a [routerLink]="['/blocks']" class="nav-btn">Blockchain State</a>
-          <a [routerLink]="['/wallets']" class="nav-btn">Wallet Balances</a>
-          <a [routerLink]="['/storedFiles']" class="nav-btn">Stored Files</a>
-          <a [routerLink]="['/storageContracts']" class="nav-btn">Storage Contracts</a>
+          <a [routerLink]="['/landing']" class="nav-btn">Página Inicial</a>
+          <a [routerLink]="['/blocks']" class="nav-btn">Estado da Blockchain</a>
+          <a [routerLink]="['/wallets']" class="nav-btn">Saldos das carteiras</a>
+          <a [routerLink]="['/storedFiles']" class="nav-btn">Páginas Armazenadas</a>
+          <a [routerLink]="['/storageContracts']" class="nav-btn">Contratos de armazenamento</a>
         </nav>
       </header>
 
@@ -34,7 +34,7 @@ import { filter } from 'rxjs';
         <router-outlet></router-outlet>
       </main>
     </div>
-    <app-personal-photo></app-personal-photo> <!-- Add photo component here -->
+    <!--<app-personal-photo></app-personal-photo> <!-- Add photo component here -->-->
     <app-footer></app-footer>
   `,
   styles: [`

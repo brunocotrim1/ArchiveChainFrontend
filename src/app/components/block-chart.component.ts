@@ -20,12 +20,12 @@ Chart.register(zoomPlugin);
   template: `
     <div class="chart-card">
       <div class="header">
-        <h2 class="title">Blockchain Metrics Over Time</h2>
-        <p class="subtitle">Cumulative trends for storage, files, and coins</p>
+        <h2 class="title">Métricas da evolução da Blockchain</h2>
+        <p class="subtitle">Tendências cumulativas para armazenamento, arquivos e moedas</p>
       </div>
       <div class="content">
         <div class="controls">
-          <label for="intervalValue">Interval Value:</label>
+          <label for="intervalValue">Intervalo de Tempo:</label>
           <input id="intervalValue" type="number" [(ngModel)]="intervalValue" min="1" step="1" placeholder="e.g., 5">
           
           <label for="timescale">Timescale:</label>
@@ -35,12 +35,12 @@ Chart.register(zoomPlugin);
             </option>
           </select>
           
-          <button (click)="processInterval()">Process</button>
+          <button (click)="processInterval()">Processar</button>
         </div>
 
         <!-- Cumulative Storage Used Chart -->
         <div class="chart-section">
-          <h3 class="chart-title">Cumulative Storage Used</h3>
+          <h3 class="chart-title">Armazenamento acumulativo utilizado</h3>
           <div class="chart-container">
             <canvas baseChart [data]="storageChartData" [options]="storageChartOptions" [type]="barChartType"></canvas>
           </div>
@@ -48,7 +48,7 @@ Chart.register(zoomPlugin);
 
         <!-- Cumulative File Count Chart -->
         <div class="chart-section">
-          <h3 class="chart-title">Cumulative File Count</h3>
+          <h3 class="chart-title">Número de arquivos acumulativo</h3>
           <div class="chart-container">
             <canvas baseChart [data]="fileChartData" [options]="fileChartOptions" [type]="barChartType"></canvas>
           </div>
@@ -56,7 +56,7 @@ Chart.register(zoomPlugin);
 
         <!-- Cumulative Mined Coins Chart -->
         <div class="chart-section">
-          <h3 class="chart-title">Cumulative Mined Coins</h3>
+          <h3 class="chart-title">Número de Moedas geradas acumulativo</h3>
           <div class="chart-container">
             <canvas baseChart [data]="coinsChartData" [options]="coinsChartOptions" [type]="barChartType"></canvas>
           </div>
@@ -72,7 +72,7 @@ Chart.register(zoomPlugin);
     }
 
     .chart-card {
-      max-width: 1400px;
+      max-width: 100%;
       margin: 2rem auto;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       border-radius: 6px;
@@ -215,10 +215,10 @@ export class BlockChartComponent implements OnInit {
   intervalValue: number = 5;
   selectedTimescale: number = 1000;
   timescales = [
-    { label: 'Seconds', value: 1000 },
-    { label: 'Minutes', value: 60 * 1000 },
-    { label: 'Hours', value: 60 * 60 * 1000 },
-    { label: 'Days', value: 24 * 60 * 60 * 1000 }
+    { label: 'Segundos', value: 1000 },
+    { label: 'Minutos', value: 60 * 1000 },
+    { label: 'Horas', value: 60 * 60 * 1000 },
+    { label: 'Dias', value: 24 * 60 * 60 * 1000 }
   ];
 
   // Storage Chart
@@ -228,7 +228,7 @@ export class BlockChartComponent implements OnInit {
     datasets: [
       {
         data: [],
-        label: 'Cumulative Storage Used (TB)',
+        label: 'Armazenamento acumulativo utilizado',
         backgroundColor: '#63B3ED',
         borderColor: '#63B3ED',
         borderWidth: 1
@@ -239,8 +239,8 @@ export class BlockChartComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: { title: { display: true, text: 'Time', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Storage (GB)', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} TB` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      x: { title: { display: true, text: 'Tempo', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+      y: { title: { display: true, text: 'Armazenamento (GB)', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} GB` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
     },
     plugins: {
       legend: { labels: { color: '#4A4A4A' }, position: 'top' },
@@ -257,7 +257,7 @@ export class BlockChartComponent implements OnInit {
     datasets: [
       {
         data: [],
-        label: 'Cumulative File Count',
+        label: 'Número de arquivos acumulativo',
         backgroundColor: '#90CDF4',
         borderColor: '#90CDF4',
         borderWidth: 1
@@ -268,8 +268,8 @@ export class BlockChartComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: { title: { display: true, text: 'Time', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Files', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value}M Files` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      x: { title: { display: true, text: 'Tempo', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+      y: { title: { display: true, text: 'Ficheiros', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value}M Files` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
     },
     plugins: {
       legend: { labels: { color: '#4A4A4A' }, position: 'top' },
@@ -286,7 +286,7 @@ export class BlockChartComponent implements OnInit {
     datasets: [
       {
         data: [],
-        label: 'Cumulative Mined Coins',
+        label: 'Número de Moedas geradas acumulativo',
         backgroundColor: '#BEE3F8',
         borderColor: '#BEE3F8',
         borderWidth: 1
@@ -297,8 +297,8 @@ export class BlockChartComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: { title: { display: true, text: 'Time', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Coins', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} Coins` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      x: { title: { display: true, text: 'Tempo', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+      y: { title: { display: true, text: 'Moedas', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} Coins` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
     },
     plugins: {
       legend: { labels: { color: '#4A4A4A' }, position: 'top' },

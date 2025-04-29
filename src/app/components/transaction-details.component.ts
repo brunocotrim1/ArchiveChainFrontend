@@ -23,13 +23,13 @@ import { Transaction, Block } from '../models/interface';
   template: `
     <mat-card class="transaction-details-card">
       <mat-card-header class="header">
-        <mat-card-title>Transaction Details</mat-card-title>
-        <mat-card-subtitle>ID: {{ transaction?.transactionId | slice:0:10 }}...</mat-card-subtitle>
+        <mat-card-title>Detalhes de transação</mat-card-title>
+        <mat-card-subtitle>ID: {{ transaction?.transactionId}}</mat-card-subtitle>
         <div class="header-actions">
           <button mat-raised-button class="block-btn" *ngIf="block" (click)="navigateToBlock()" [disabled]="!block?.height">
             <mat-icon class="nav-icon">navigation</mat-icon>
             <mat-icon class="spin-icon">cube</mat-icon>
-            <span class="btn-text">Block {{ block?.height }}</span>
+            <span class="btn-text">Bloco {{ block?.height }}</span>
           </button>
           <button mat-icon-button class="close-icon" (click)="closeDialog()" aria-label="Close dialog">
             <mat-icon>close</mat-icon>
@@ -43,7 +43,7 @@ import { Transaction, Block } from '../models/interface';
             <div class="details-container">
               <div class="detail-group">
                 <div class="detail-item">
-                  <span class="label">Type</span>
+                  <span class="label">Tipo</span>
                   <span class="value">{{ transaction.type }}</span>
                 </div>
               </div>
@@ -85,29 +85,29 @@ import { Transaction, Block } from '../models/interface';
                       </span>
                     </div>
                     <div class="detail-item">
-                      <span class="label">Storage Contract Hash</span>
+                      <span class="label">Hash do contrato de armazenamento</span>
                       <span class="value clickable" (click)="navigateToStorageContract(transaction.fileProof?.storageContractHash, transaction.fileProof?.fileUrl)">
                         {{ transaction.fileProof?.storageContractHash || 'N/A' }}
                       </span>
                     </div>
                     <div class="detail-item">
-                      <span class="label">PoDP Challenge</span>
+                      <span class="label">Desafio PDP</span>
                       <span class="value">{{ transaction.fileProof?.poDpChallenge || 'N/A' }}</span>
                     </div>
                     <div class="detail-item">
-                      <span class="label">Start Block Index</span>
+                      <span class="label">Índice Bloco de começo</span>
                       <span class="value">{{ transaction.fileProof?.startBlockIndex ?? 'N/A' }}</span>
                     </div>
                     <div class="detail-item">
-                      <span class="label">End Block Index</span>
+                      <span class="label">Índice Bloco de fim</span>
                       <span class="value">{{ transaction.fileProof?.endBlockIndex ?? 'N/A' }}</span>
                     </div>
                     <div class="detail-item">
-                      <span class="label">Storer Public Key</span>
+                      <span class="label">Chave pública do armazenador</span>
                       <span class="value">{{ transaction.storerPublicKey || 'N/A' }}</span>
                     </div>
                     <div class="detail-item">
-                      <span class="label">Storer Signature</span>
+                      <span class="label">Assinatura do armazenador</span>
                       <span class="value">{{ transaction.storerSignature || 'N/A' }}</span>
                     </div>
                     <div class="detail-item">
@@ -165,7 +165,6 @@ import { Transaction, Block } from '../models/interface';
 
     .transaction-details-card {
       width: 100%;
-      max-width: 500px;
       margin: 0;
       border-radius: 8px;
       box-shadow: none;

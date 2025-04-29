@@ -33,8 +33,8 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
   template: `
     <mat-card class="blocks-card">
       <mat-card-header class="header">
-        <mat-card-title>Blockchain Explorer</mat-card-title>
-        <mat-card-subtitle>Real-time chain visualization & transactions</mat-card-subtitle>
+        <mat-card-title>Explorador da Blockchain</mat-card-title>
+        <mat-card-subtitle>Visualização e transações da blockchain em tempo real</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content class="content-wrapper">
         <mat-form-field appearance="outline" class="search-field">

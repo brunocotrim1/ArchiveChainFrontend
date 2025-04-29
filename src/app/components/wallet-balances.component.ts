@@ -23,16 +23,16 @@ import { WalletBalance } from '../models/interface';
     <div class="participant-container">
       <mat-card class="participant-card">
         <mat-card-header class="header">
-          <mat-card-title>Participant Balances</mat-card-title>
-          <mat-card-subtitle>Current balances across all participants</mat-card-subtitle>
+          <mat-card-title>Participantes</mat-card-title>
+          <mat-card-subtitle>Saltos atuais de todos os participantes</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="content-wrapper">
           <div *ngIf="mockBalances.length > 0; else noParticipantsFound" class="participant-list">
             <table class="participant-table">
               <thead>
                 <tr>
-                  <th class="address-header">Participant Address</th>
-                  <th class="balance-header">Balance (Coins)</th>
+                  <th class="address-header">Endereços dos Participantes</th>
+                  <th class="balance-header">Saldo</th>
                 </tr>
               </thead>
               <tbody>
@@ -328,6 +328,6 @@ export class WalletBalancesComponent implements OnInit {
     return balance.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }) + ' Coins';
+    }) + ' Moedas';
   }
 }
