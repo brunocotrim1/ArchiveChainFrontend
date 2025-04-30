@@ -34,7 +34,7 @@ import { filter } from 'rxjs';
         <router-outlet></router-outlet>
       </main>
     </div>
-    <!--<app-personal-photo></app-personal-photo> <!-- Add photo component here -->-->
+    <!--<app-personal-photo></app-personal-photo>Add photo component here -->
     <app-footer></app-footer>
   `,
   styles: [`
@@ -175,7 +175,9 @@ export class AppComponent implements OnInit {
       filter((event) => event instanceof NavigationEnd) // Only listen for NavigationEnd events
     ).subscribe(() => {
       // Scroll to the top of the page after navigation
+      if(!this.router.url.includes('/wallet-details')) {
       window.scrollTo(0, 0);
+      }
     });
   }
 }

@@ -1,12 +1,12 @@
 {
 "/storage/*": {
-    "target": "http://85.245.113.27:8085",
+    "target": "http://archivechain.pt:8085",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   },
   "/explorer/*": {
-    "target": "http://85.245.113.27:8080",
+    "target": "http://archivechain.pt:8080",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

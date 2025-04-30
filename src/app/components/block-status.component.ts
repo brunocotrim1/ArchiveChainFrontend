@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,12 +38,13 @@ import { MatIconModule } from '@angular/material/icon';
       padding: 0.75rem;
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
       gap: 0.5rem;
       box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
       border: 1px solid #E0E0E0;
       width: 100%;
       box-sizing: border-box;
-      overflow-x: auto;
+      overflow-x: hidden;
     }
     .status-item {
       display: flex;
@@ -113,7 +114,6 @@ export class BlockStatusComponent {
   formatStorage(bytes: number): string {
     if (bytes <= 0) return '0 MB';
     const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    //const units = ['TB', 'TB', 'TB', 'TB', 'TB'];
     let value = bytes;
     let unitIndex = 0;
     while (value >= 1000 && unitIndex < units.length - 1) {

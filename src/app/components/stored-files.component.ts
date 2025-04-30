@@ -13,7 +13,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
-import { query } from '@angular/animations';
 
 // Dialog Component
 @Component({
@@ -209,8 +208,10 @@ export class StorersDialogComponent {
     try {
       const contractHash = await this.blockchainService.getStorageHashFileAndAddress(this.data.fileUrl, storer);
       if (contractHash) {
+        const currentQueryParams = this.router.routerState.snapshot.root.queryParams;
+
         this.router.navigate(['/storageContractDetails'], {
-          queryParams: { contractHash, fileUrl: this.data.fileUrl }
+          queryParams: { contractHash, fileUrl: this.data.fileUrl}, state: { returnUrl: this.router.url.split('?')[0], queryParams: currentQueryParams }
         });
         this.dialogRef.close();
       } else {
@@ -315,13 +316,14 @@ export class StorersDialogComponent {
       font-family: 'Roboto', sans-serif;
       background: #F5F6F5;
       min-height: 100vh;
-      padding: 1rem;
+      padding: 0; /* Remove padding to use full parent space */
       box-sizing: border-box;
+      width: 100%; /* Ensure full width */
     }
 
     .explorer-container {
-      max-width: 100%;
-      margin: 0 auto;
+      width: 100%; /* Use full width of parent */
+      margin: 0; /* Remove centering margins */
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -330,7 +332,9 @@ export class StorersDialogComponent {
     .stored-files-card {
       background: #FFFFFF;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      padding: 1rem;
+      padding: 1rem; /* Keep internal padding */
+      width: 100%; /* Ensure card takes full width */
+      box-sizing: border-box;
     }
 
     mat-card-header {
@@ -439,12 +443,6 @@ export class StorersDialogComponent {
     }
 
     @media (min-width: 768px) {
-      :host {
-        padding: 2rem;
-      }
-      .explorer-container {
-        max-width: 90%;
-      }
       .stored-files-card {
         padding: 1.5rem;
       }
@@ -565,8 +563,9 @@ export class StoredFilesComponent implements OnInit {
         page: this.currentPage,
         pageSize: this.pageSize,
         fileName: this.searchTerm.trim() || null // Preserve search term
-      },state: { returnUrl: this.router.url },
-      queryParamsHandling: 'merge',
+      },
+      state: { returnUrl: this.router.url },
+      queryParamsHandling: 'merge'
     });
   }
 

@@ -160,8 +160,8 @@ import { Block, Transaction } from '../models/interface';
 
       <!-- Back to Blocks Button -->
       <mat-card-actions class="actions">
-        <button mat-raised-button class="back-btn" [routerLink]="['/blocks']">
-          <mat-icon>arrow_back</mat-icon> Back to Blocks
+        <button mat-raised-button class="back-btn" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon> Back
         </button>
       </mat-card-actions>
     </mat-card>
@@ -490,4 +490,13 @@ export class BlockDetailsComponent implements OnInit {
   extractFilename(fileUrl: string): string {
     return decodeURIComponent(fileUrl);
   }
+  goBack() {
+    const navigationState = history.state;
+    const returnUrl = navigationState?.returnUrl || '/blocks';
+    console.log('Navigating to:', navigationState.returnUrl);
+    const queryParams = navigationState?.queryParams || {};
+    console.log('Query params:', queryParams);
+    this.router.navigate([returnUrl], { queryParams });
+  }
+
 }

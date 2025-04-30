@@ -60,6 +60,16 @@ export class MockBlockchainService extends BlockchainService {
     }
   }
 
+  async getLastBlockIndex(): Promise<number> {
+    try {
+      const response = await this.http.get<number>(`${this.backendUrl}/explorer/getLastBlockIndex`).toPromise();
+      return response ?? 0;
+    } catch (error) {
+      console.error('Error fetching last block index:', error);
+      throw error;
+    }
+  }
+
   async getStoredFiles(offset: number = 0, limit: number = 10,fileName: string =''): Promise<string[]> {
     try {
       const response = await this.http.get<string[]>(`${this.backendUrl}/explorer/storedFiles`,{ params: { offset: offset.toString(), limit: limit.toString(),fileName: fileName } }).toPromise();
@@ -223,9 +233,9 @@ export class MockBlockchainService extends BlockchainService {
     }
   }
 
-  async getWalletDetails(address: string): Promise<WalletDetails | null> {
+  async getWalletDetails(address: string,offset: number = 0, limit: number = 10): Promise<WalletDetails | null> {
     try {
-      let params = new HttpParams().set('address', address);
+      let params = new HttpParams().set('address', address).set('offset', offset.toString()).set('limit', limit.toString());
       const response = await this.http.get<WalletDetails>(`${this.backendUrl}/explorer/getWalletDetails`, { params }).toPromise();
       return response ?? null;
     } catch (error) {

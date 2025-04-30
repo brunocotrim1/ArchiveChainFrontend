@@ -82,7 +82,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
           </div>
 
           <div class="transactions-container">
-            <h3>Recent Transactions</h3>
+            <h3>Transações Recentes</h3>
             <div class="transactions-list" *ngIf="recentTransactions.length > 0; else noTransactions"
                  [@txPushAnimation]="recentTransactions.length" [@.disabled]="!shouldAnimateTx">
               <div *ngFor="let tx of recentTransactions" class="transaction-item" (click)="openTransactionDialog(tx)"

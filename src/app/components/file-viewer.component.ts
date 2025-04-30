@@ -57,13 +57,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
                   [src]="safeUrl" 
                   width="100%" 
                   height="600px"
-                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+                  sandbox="allow-same-origin allow-scripts"
                   frameborder="0"></iframe> 
           <img *ngIf="isImage" 
                [src]="safeUrl" 
                alt="File content" 
                class="responsive-image">
-          <pre *ngIf="isText">{{ fileContent }}</pre>
+          <pre *ngIf="isText && !isJson">{{ fileContent }}</pre>
+          <pre *ngIf="isJson" class="json-content">{{ formattedJson }}</pre>
           <div *ngIf="isUnsupported" class="unsupported-message">
             Preview not available for this file type. 
             <a [href]="safeUrl" download="{{fileName}}">Download file</a>
@@ -135,6 +136,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       overflow-x: auto;
       font-size: clamp(0.85rem, 2.5vw, 0.95rem);
       color: #4A4A4A;
+    }
+    .json-content {
+      background: #F5F5F5;
+      padding: 1rem;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
     }
     .unsupported-message {
       padding: 1rem;
@@ -211,6 +220,7 @@ export class FileViewerComponent implements OnInit {
   fileType: string = '';
   safeUrl: SafeResourceUrl | null = null;
   fileContent: string = '';
+  formattedJson: string = '';
   originalUrl: string = '';
   blobUrl: string = '';
   
@@ -218,12 +228,14 @@ export class FileViewerComponent implements OnInit {
   isHtml = false;
   isImage = false;
   isText = false;
+  isJson = false;
   isUnsupported = false;
 
   private http = inject(HttpClient);
   private sanitizer = inject(DomSanitizer);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private baseUrl = 'https://archivechain.pt';
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -239,7 +251,8 @@ export class FileViewerComponent implements OnInit {
 
   private async fetchFile() {
     try {
-      const url = `http://85.245.113.27:8085/storage/retrieveFile?filename=${encodeURIComponent(this.fileName)}`;
+      const url = `${this.baseUrl}/storage/retrieveFile?filename=${encodeURIComponent(this.fileName)}`;
+
       console.log('Fetching file from URL:', url);
       const response = await this.http.get(url, {
         responseType: 'blob',
@@ -247,16 +260,38 @@ export class FileViewerComponent implements OnInit {
       }).toPromise();
 
       if (response?.body) {
-        const contentType = response.headers.get('Content-Type') || 'application/octet-stream';
-        console.log('Content type:', contentType);
+        var contentType = response.headers.get('Content-Type') || 'application/octet-stream';
+        const regex = /\.jpg\.json/g;
+        if (this.fileName.match(regex)) {
+          const newFileName = this.fileName.replace(regex, '.jpg');
+          this.fileName = newFileName;
+          contentType = 'image/jpeg';
+        }
         this.fileType = contentType.split('/')[1] || this.getExtensionFromFileName();
-        
-        const blob = new Blob([response.body], { type: contentType });
+
+        console.log('Content type:', contentType);
+
+        console.log('File type:', this.fileType);
+        let blob = response.body;
+        if (contentType.includes('html')) {
+          const htmlContent = await blob.text();
+          const modifiedHtml = await this.processHtmlContent(htmlContent);
+          blob = new Blob([modifiedHtml], { type: 'text/html' });
+        } else if (contentType.includes('json')) {
+          const jsonContent = await blob.text();
+          try {
+            const jsonObj = JSON.parse(jsonContent);
+            this.formattedJson = JSON.stringify(jsonObj, null, 2);
+          } catch (e) {
+            this.fileContent = jsonContent; // Fallback to raw text if JSON is invalid
+          }
+        }
+
         this.blobUrl = window.URL.createObjectURL(blob);
         this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.blobUrl);
 
         this.determineDisplayType(contentType);
-        if (this.isText) {
+        if (this.isText || this.isJson) {
           this.fileContent = await blob.text();
         }
       }
@@ -269,12 +304,85 @@ export class FileViewerComponent implements OnInit {
     }
   }
 
+  private async processHtmlContent(htmlContent: string): Promise<string> {
+    let modifiedHtml = htmlContent;
+    const linkRegex = /<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi;
+    modifiedHtml = await modifiedHtml.replaceAsync(linkRegex, async (match, href) => {
+      try {
+        let modifiedHref = href;
+        if (modifiedHref.startsWith('/noFrame')) {
+          modifiedHref = `https://archivechain.pt${modifiedHref}`;
+        }
+        if (!modifiedHref.startsWith('http')) {
+          modifiedHref = modifiedHref.startsWith('/') ? modifiedHref.substring(1) : modifiedHref;
+          modifiedHref = `${this.baseUrl}/${modifiedHref}`;
+        }
+        const cssResponse = await this.http.get(modifiedHref, { responseType: 'text' }).toPromise();
+        if (cssResponse) {
+          let modifiedCss = cssResponse
+            .replace(/url\(['"]?\/noFrame([^'")]+)['"]?\)/gi, `url('https://archivechain.pt/noFrame$1')`)
+            .replace(/https:\/\/arquivo\.pt/gi, 'https://archivechain.pt');
+          return `<style>${modifiedCss}</style>`;
+        }
+        return '';
+      } catch (error) {
+        console.error(`Failed to fetch CSS from ${href}:`, error);
+        return '';
+      }
+    });
+
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+    modifiedHtml = modifiedHtml.replace(styleRegex, (match, cssContent) => {
+      const modifiedCss = cssContent
+        .replace(/url\(['"]?\/noFrame([^'")]+)['"]?\)/gi, `url('https://archivechain.pt/noFrame$1')`)
+        .replace(/https:\/\/arquivo\.pt/gi, 'https://archivechain.pt');
+      return `<style>${modifiedCss}</style>`;
+    });
+
+    const styleAttrRegex = /style=["']([^"']*)["']/gi;
+    modifiedHtml = modifiedHtml.replace(styleAttrRegex, (match, styleContent) => {
+      const modifiedStyle = styleContent
+        .replace(/url\(['"]?\/noFrame([^'")]+)['"]?\)/gi, `url('https://archivechain.pt/noFrame$1')`)
+        .replace(/https:\/\/arquivo\.pt/gi, 'https://archivechain.pt');
+      return `style="${modifiedStyle}"`;
+    });
+
+    const imgRegex = /<img[^>]*src=["']([^"']+)["'][^>]*>/gi;
+    modifiedHtml = modifiedHtml.replace(imgRegex, (match, src) => {
+      let modifiedSrc = src;
+      if (!modifiedSrc.startsWith('http')) {
+        modifiedSrc = modifiedSrc.startsWith('/') ? modifiedSrc.substring(1) : modifiedSrc;
+        modifiedSrc = `${this.baseUrl}/${modifiedSrc}`;
+      }
+      modifiedSrc = modifiedSrc.replace('https://arquivo.pt', 'https://archivechain.pt');
+      return match.replace(src, modifiedSrc);
+    });
+
+    const urlAttrRegex = /(href|src)=["']([^"']+)["']/gi;
+    modifiedHtml = modifiedHtml.replace(urlAttrRegex, (match, attr, url) => {
+      let modifiedUrl = url.replace('https://arquivo.pt', 'https://archivechain.pt');
+      return `${attr}="${modifiedUrl}"`;
+    });
+
+    if (!modifiedHtml.match(/<base[^>]*>/i)) {
+      const headIndex = modifiedHtml.indexOf('<head>') + 6;
+      if (headIndex >= 6) {
+        modifiedHtml = modifiedHtml.slice(0, headIndex) + `<base href="${this.baseUrl}/">` + modifiedHtml.slice(headIndex);
+      } else {
+        modifiedHtml = `<base href="${this.baseUrl}/">` + modifiedHtml;
+      }
+    }
+
+    return modifiedHtml;
+  }
+
   private determineDisplayType(contentType: string) {
     this.isPdf = contentType.includes('pdf');
     this.isHtml = contentType.includes('html');
-    this.isImage = contentType.includes('image');
-    this.isText = (contentType.includes('text/plain') || contentType.includes('plain')) && !this.isHtml;
-    this.isUnsupported = !this.isPdf && !this.isHtml && !this.isImage && !this.isText;
+    this.isImage = contentType.includes('image') && (contentType.includes('jpeg') || contentType.includes('png') || contentType.includes('gif'));
+    this.isJson = contentType.includes('json');
+    this.isText = (contentType.includes('text/plain') || contentType.includes('plain')) && !this.isHtml && !this.isJson;
+    this.isUnsupported = !this.isPdf && !this.isHtml && !this.isImage && !this.isText && !this.isJson;
   }
 
   private getExtensionFromFileName(): string {
@@ -288,7 +396,7 @@ export class FileViewerComponent implements OnInit {
     console.log('Navigating to:', navigationState.returnUrl);
     const queryParams = navigationState?.queryParams || {};
     console.log('Query params:', queryParams);
-    this.router.navigate([returnUrl],{ queryParams});
+    this.router.navigate([returnUrl], { queryParams });
   }
 
   openInNewTab() {
@@ -298,7 +406,6 @@ export class FileViewerComponent implements OnInit {
   }
 
   downloadFile() {
-  
     if (this.blobUrl) {
       const link = document.createElement('a');
       link.href = this.blobUrl;
@@ -321,3 +428,21 @@ export class FileViewerComponent implements OnInit {
     return fileName;
   }
 }
+
+declare global {
+  interface String {
+    replaceAsync(regex: RegExp, asyncFn: (match: string, ...args: any[]) => Promise<string>): Promise<string>;
+  }
+}
+
+String.prototype.replaceAsync = async function (regex: RegExp, asyncFn: (match: string, ...args: any[]) => Promise<string>): Promise<string> {
+  const promises: Promise<string>[] = [];
+  this.replace(regex, (...args): string => {
+    const promise = asyncFn(...args);
+    promises.push(promise);
+    return '';
+  });
+  const replacements = await Promise.all(promises);
+  let index = 0;
+  return this.replace(regex, () => replacements[index++]);
+};

@@ -1,17 +1,19 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { WalletDetails, Transaction, StorageContract } from '../models/interface';
 import { TransactionDetailsComponent } from './transaction-details.component';
 import { DatePipe } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   standalone: true,
@@ -24,7 +26,9 @@ import { DatePipe } from '@angular/common';
     MatListModule,
     MatTableModule,
     MatDialogModule,
-    RouterLink
+    RouterLink,
+    MatFormFieldModule,
+    MatSelectModule
   ],
   providers: [DatePipe],
   selector: 'app-wallet-details',
@@ -112,7 +116,24 @@ import { DatePipe } from '@angular/common';
 
             <!-- Transactions -->
             <mat-divider class="divider"></mat-divider>
-            <h3 class="section-title">Transações ({{ walletDetails.transactions.length }})</h3>
+            <h3 class="section-title">Transações por páginas de blocos({{ totalTransactions }})</h3>
+            <div class="pagination-section">
+              <mat-form-field appearance="outline" class="page-size-selector">
+                <mat-label>Items por página</mat-label>
+                <mat-select [(value)]="pageSize" (selectionChange)="onPageSizeChange($event.value)">
+                  <mat-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div class="page-navigator">
+                <button mat-raised-button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+                  Anterior
+                </button>
+                <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
+                <button mat-raised-button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+                  Próximo
+                </button>
+              </div>
+            </div>
             <div class="transactions-container" *ngIf="walletDetails.transactions.length > 0; else noTransactions">
               <mat-table [dataSource]="walletDetails.transactions">
                 <ng-container matColumnDef="type">
@@ -164,7 +185,7 @@ import { DatePipe } from '@angular/common';
 
       <mat-card-actions class="actions">
         <button mat-raised-button class="back-btn" [routerLink]="['/wallet-balances']">
-          <mat-icon>arrow_back</mat-icon> Back to Wallet Balances
+          <mat-icon>arrow_back</mat-icon> Voltar para saldos de carteira
         </button>
       </mat-card-actions>
     </mat-card>
@@ -320,7 +341,7 @@ import { DatePipe } from '@angular/common';
 
     .blocks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Reduced from 100px */
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
       gap: 0.5rem;
     }
 
@@ -329,13 +350,13 @@ import { DatePipe } from '@angular/common';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0.5rem; /* Reduced from 0.75rem */
+      padding: 0.5rem;
       background: #FFFFFF;
       border: 1px solid #E2E8F0;
       border-radius: 4px;
       transition: all 0.3s ease;
       text-align: center;
-      min-height: 60px; /* Reduced from 80px */
+      min-height: 60px;
     }
 
     .block-item:hover {
@@ -346,7 +367,7 @@ import { DatePipe } from '@angular/common';
 
     .block-icon {
       color: #2F855A;
-      font-size: 1.25rem; /* Reduced from 1.5rem */
+      font-size: 1.25rem;
       height: 1.25rem;
       width: 1.25rem;
       margin-bottom: 0.25rem;
@@ -358,7 +379,7 @@ import { DatePipe } from '@angular/common';
     }
 
     .block-item span {
-      font-size: clamp(0.65rem, 2vw, 0.75rem); /* Reduced from 0.75rem-0.85rem */
+      font-size: clamp(0.65rem, 2vw, 0.75rem);
       color: #4A4A4A;
     }
 
@@ -453,13 +474,45 @@ import { DatePipe } from '@angular/common';
       color: #FFFFFF;
     }
 
+    .pagination-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .page-size-selector {
+      width: 150px;
+    }
+
+    .page-navigator {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-info {
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    mat-raised-button {
+      background: #2F855A;
+      color: #FFFFFF;
+    }
+
+    mat-raised-button[disabled] {
+      background: #cccccc;
+      color: #666;
+    }
+
     @media (max-width: 768px) {
       :host { padding: 0.5rem; }
       .wallet-details-card { margin: 0.75rem auto; }
       .header, .content, .actions { padding: 0.5rem; }
       .detail-group { grid-template-columns: 1fr; }
       mat-header-cell, mat-cell { font-size: clamp(0.7rem, 2vw, 0.8rem); }
-      .blocks-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); } /* Reduced from 80px */
+      .blocks-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
     }
 
     @media (max-width: 480px) {
@@ -468,9 +521,9 @@ import { DatePipe } from '@angular/common';
       .section-title { font-size: clamp(0.9rem, 3vw, 1rem); }
       .back-btn { font-size: clamp(0.65rem, 2vw, 0.75rem); }
       .back-btn mat-icon { font-size: 0.9rem; height: 0.9rem; width: 0.9rem; }
-      .block-item { padding: 0.4rem; min-height: 50px; } /* Reduced further */
-      .block-icon { font-size: 1rem; height: 1rem; width: 1rem; } /* Reduced from 1.25rem */
-      .block-item span { font-size: clamp(0.6rem, 2vw, 0.7rem); } /* Reduced further */
+      .block-item { padding: 0.4rem; min-height: 50px; }
+      .block-icon { font-size: 1rem; height: 1rem; width: 1rem; }
+      .block-item span { font-size: clamp(0.6rem, 2vw, 0.7rem); }
     }
   `]
 })
@@ -479,6 +532,14 @@ export class WalletDetailsComponent implements OnInit {
   transactionColumns = ['type', 'transactionId', 'details'];
   contractColumns = ['fileUrl', 'storerAddress', 'value', 'timestamp'];
   totalStorage: number = 0;
+  totalTransactions: number = 0;
+  
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalPages: number = 1;
+  pageSizeOptions: number[] = [10, 20, 50, 100];
+  @ViewChild(MatTable) table!: MatTable<any>;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -486,24 +547,33 @@ export class WalletDetailsComponent implements OnInit {
   private dialog = inject(MatDialog);
   private datePipe = inject(DatePipe);
 
-  async ngOnInit() {
-    const address = this.route.snapshot.paramMap.get('address');
-    if (address) {
-      await this.fetchWalletDetails(address);
-    }
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.currentPage = parseInt(params['page']) || 1;
+      this.pageSize = parseInt(params['pageSize']) || 10;
+      const address = this.route.snapshot.paramMap.get('address');
+      if (address) {
+        this.fetchWalletDetails(address);
+      }
+    });
   }
 
   async fetchWalletDetails(address: string) {
     try {
-      this.walletDetails = await this.blockchainService.getWalletDetails(address);
+      this.walletDetails = await this.blockchainService.getWalletDetails(address, this.currentPage, this.pageSize);
+      console.log('Wallet Details:', this.walletDetails);
+      this.totalTransactions = await this.blockchainService.getLastBlockIndex() || 0;
       if (this.walletDetails) {
-        this.walletDetails.transactions.sort((a, b) => (b.transactionId || '').localeCompare(a.transactionId || ''));
         this.walletDetails.storageContracts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         this.totalStorage = this.walletDetails.storageContracts.reduce((sum, contract) => sum + contract.fileLength, 0);
+        this.totalPages = Math.ceil(this.totalTransactions / this.pageSize);
+        if (this.table) this.table.renderRows();
       }
     } catch (error) {
       console.error('Error fetching wallet details:', error);
       this.walletDetails = null;
+      this.totalTransactions = 0;
+      this.totalPages = 1;
     }
   }
 
@@ -527,7 +597,10 @@ export class WalletDetailsComponent implements OnInit {
   }
 
   navigateToBlock(height: number) {
-    this.router.navigate(['/blocks', height]);
+    const currentQueryParams = this.router.routerState.snapshot.root.queryParams;
+    this.router.navigate(['/blocks', height],{
+      state: { returnUrl: this.router.url.split('?')[0], queryParams: currentQueryParams }
+    });
   }
 
   navigateToFileViewer(fileUrl: string) {
@@ -536,18 +609,19 @@ export class WalletDetailsComponent implements OnInit {
       queryParams: { filename },
       state: { returnUrl: this.router.url }
     });
-    
   }
 
   navigateToContract(contract: StorageContract) {
     const hexHash = this.convertBase64ToHex(contract.hash);
+    const currentQueryParams = this.router.routerState.snapshot.root.queryParams;
     this.router.navigate(['/storageContractDetails'], {
-      queryParams: { contractHash: hexHash, fileUrl: contract.fileUrl }
+      queryParams: { contractHash: hexHash, fileUrl: contract.fileUrl },
+      state: { returnUrl: this.router.url.split('?')[0], queryParams: currentQueryParams }
     });
   }
 
   extractFilename(fileUrl: string): string {
-    return fileUrl
+    return fileUrl;
   }
 
   private convertBase64ToHex(base64Str: string): string {
@@ -562,5 +636,31 @@ export class WalletDetailsComponent implements OnInit {
       console.warn('Invalid Base64 string, returning as-is:', base64Str, error);
       return base64Str;
     }
+  }
+
+  goToPage(page: number) {
+    this.currentPage = page;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: this.currentPage,
+        pageSize: this.pageSize
+      },
+      queryParamsHandling: 'merge',
+      state: { returnUrl: this.router.url }
+    });
+  }
+
+  onPageSizeChange(newSize: number) {
+    this.pageSize = newSize;
+    this.currentPage = 1;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: this.currentPage,
+        pageSize: this.pageSize
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 }

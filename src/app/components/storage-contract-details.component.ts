@@ -1,4 +1,3 @@
-// storage-contract-details.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +7,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { StorageContract, FileProvingWindow } from '../models/interface';
+import { Location } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -127,8 +127,8 @@ import { StorageContract, FileProvingWindow } from '../models/interface';
       </mat-card-content>
 
       <mat-card-actions class="actions">
-        <button mat-raised-button class="back-btn" [routerLink]="['/storageContracts']">
-          <mat-icon>arrow_back</mat-icon> Back to Storage Contracts
+        <button mat-raised-button class="back-btn" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon> Back
         </button>
       </mat-card-actions>
     </mat-card>
@@ -467,6 +467,7 @@ export class StorageContractDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private blockchainService = inject(MockBlockchainService);
+  private location = inject(Location);
 
   async ngOnInit() {
     const contractHash = this.route.snapshot.queryParamMap.get('contractHash');
@@ -512,14 +513,22 @@ export class StorageContractDetailsComponent implements OnInit {
   navigateToFileViewer(fileUrl: string | undefined) {
     if (fileUrl) {
       const filename = this.extractFilename(fileUrl);
+      const currentQueryParams = this.router.routerState.snapshot.root.queryParams;
       this.router.navigate(['/file-viewer'], {
-        queryParams: { filename }
+        queryParams: { filename },
+        state: { returnUrl: this.router.url.split('?')[0], queryParams: currentQueryParams }
       });
     }
   }
 
+  goBack() {
+    // Retrieve returnUrl from navigation state
+    const state = history.state;
+    const returnUrl = state?.returnUrl || '/storageContracts';
+    this.router.navigateByUrl(returnUrl);
+  }
+
   private extractFilename(fileUrl: string): string {
-    const parts = fileUrl.split('/');
-    return parts[parts.length - 1] || fileUrl;
+    return fileUrl
   }
 }
