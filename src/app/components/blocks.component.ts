@@ -13,7 +13,7 @@ import { Block } from '../models/interface';
   selector: 'app-blocks',
   template: `
     <div class="explorer-container">
-      <app-block-status [latestBlockHeight]="allBlocks[0]?.height"
+      <app-block-status [latestBlockHeight]="lastBlockIndex"
                         [archivedStorage]="archivedStorage"
                         [totalContracts]="totalContracts"
                         [totalCoins]="totalCoins"
@@ -45,18 +45,16 @@ import { Block } from '../models/interface';
   `]
 })
 export class BlocksComponent implements OnInit, OnDestroy {
-  allBlocks: Block[] = [];
   archivedStorage: number = 0;
   totalContracts: string = '0';
   totalCoins: string = '0';
+  lastBlockIndex: number = 0;
   totalStoredFiles: string = '0';  // Added new property
   private blockchainService = inject(MockBlockchainService);
   private pollSubscription: Subscription | null = null;
 
   async ngOnInit() {
     await this.fetchAdditionalData();
-    const blocks = await this.blockchainService.getBlocks(10) ?? [];
-    this.allBlocks = blocks.sort((a, b) => b.height - a.height);
     this.startPolling();
   }
 
@@ -67,14 +65,6 @@ export class BlocksComponent implements OnInit, OnDestroy {
   private startPolling() {
     this.pollSubscription = interval(15000).subscribe(async () => {
       try {
-        const latestBlocks = await this.blockchainService.getBlocks(3);
-        if (latestBlocks && latestBlocks.length > 0) {
-          const sortedLatestBlocks = latestBlocks.sort((a, b) => a.height - b.height);
-          const currentLatestHeight = this.allBlocks[0]?.height ?? -1;
-          for (const block of sortedLatestBlocks) {
-            if (block.height > currentLatestHeight) this.allBlocks.unshift(block);
-          }
-        }
         await this.fetchAdditionalData();
       } catch (error) {
         console.error('Error polling latest blocks or additional data:', error);
@@ -84,16 +74,18 @@ export class BlocksComponent implements OnInit, OnDestroy {
 
   private async fetchAdditionalData() {
     try {
-      const [storageResponse, contractsResponse, coinsResponse, filesResponse] = await Promise.all([
+      const [storageResponse, contractsResponse, coinsResponse, filesResponse,lastBlockIndex] = await Promise.all([
         this.blockchainService.getArchivedStorage(),
         this.blockchainService.getTotalAmountOfContracts(),
         this.blockchainService.getTotalAmountOfCoins(),
-        this.blockchainService.getTotalAmountOfFiles()  // Added new service call
+        this.blockchainService.getTotalAmountOfFiles(),
+        this.blockchainService.getLastBlockIndex()
       ]);
       this.archivedStorage = storageResponse ? parseFloat(storageResponse) : 0;
       this.totalContracts = String(Number(contractsResponse)*4)  || '0';
       this.totalCoins = coinsResponse || '0';
       this.totalStoredFiles = filesResponse || '0';  // Assign the new value
+      this.lastBlockIndex = lastBlockIndex || 0;  // Assign the last block index
     } catch (error) {
       console.error('Error fetching additional data:', error);
       this.archivedStorage = 0;

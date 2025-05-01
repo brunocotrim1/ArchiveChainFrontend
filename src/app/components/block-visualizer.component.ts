@@ -6,11 +6,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog'; // Add dialog imports
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
-import { TransactionDetailsComponent } from './transaction-details.component'; // Import TransactionDetailsComponent
+import { TransactionDetailsComponent } from './transaction-details.component';
 import { Block, Transaction } from '../models/interface';
 import { interval, Subscription } from 'rxjs';
 import { trigger, style, transition, animate, query, stagger } from '@angular/animations';
@@ -25,7 +25,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    MatDialogModule, // Add MatDialogModule
+    MatDialogModule,
     FormsModule,
     RouterLink
   ],
@@ -44,8 +44,20 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
         </mat-form-field>
 
         <div class="visualizer-transactions-container">
-          <div #blockchainContainer class="blockchain-container" (scroll)="onScroll($event)">
-            <div class="blockchain-chain" [@pushAnimation]="filteredBlocks.length" [@.disabled]="!shouldAnimate">
+          <div #blockchainContainer class="blockchain-container"
+               (mousedown)="startDragging($event)"
+               (mousemove)="drag($event)"
+               (mouseup)="stopDragging()"
+               (mouseleave)="stopDragging()"
+               (touchstart)="startDragging($event)"
+               (touchmove)="drag($event)"
+               (touchend)="stopDragging()"
+               (scroll)="onScroll($event)">
+            <div *ngIf="isLoadingInitial" class="loading-blocks">
+              <mat-icon>hourglass_empty</mat-icon>
+              <p>Blocks loading...</p>
+            </div>
+            <div class="blockchain-chain" *ngIf="!isLoadingInitial" [@pushAnimation]="filteredBlocks.length" [@.disabled]="!shouldAnimate">
               <div *ngFor="let block of filteredBlocks; let i = index" class="block-wrapper">
                 <div class="block-cube" [routerLink]="['/blocks', block.height]" (click)="onBlockClick(block)"
                      [matTooltip]="'Block ' + block.height + '\nHash: ' + block.hash + '\nFile: ' + block.posProof.winningFilename">
@@ -75,7 +87,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
                 </div>
               </div>
             </div>
-            <div class="no-blocks" *ngIf="filteredBlocks.length === 0">
+            <div class="no-blocks" *ngIf="!isLoadingInitial && filteredBlocks.length === 0">
               <mat-icon>info</mat-icon>
               <p>No blocks found.</p>
             </div>
@@ -164,6 +176,8 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
       justify-content: flex-start;
       align-items: center;
       min-height: 280px;
+      user-select: none;
+      touch-action: none; /* Prevents default touch scrolling */
     }
     .blockchain-chain {
       display: inline-flex;
@@ -272,7 +286,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
     }
     .chain-link { width: 100%; height: 50px; transition: transform 0.3s ease; }
     .block-cube:hover + .block-connector .chain-link { transform: scale(1.1); }
-    .no-blocks, .no-transactions {
+    .no-blocks, .no-transactions, .loading-blocks {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -284,14 +298,14 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
       width: 100%;
       box-sizing: border-box;
     }
-    .no-blocks mat-icon, .no-transactions mat-icon {
+    .no-blocks mat-icon, .no-transactions mat-icon, .loading-blocks mat-icon {
       margin-right: 0.5rem;
       color: #FFB300;
       font-size: 1.25rem;
       height: 1.25rem;
       width: 1.25rem;
     }
-    .no-blocks p, .no-transactions p {
+    .no-blocks p, .no-transactions p, .loading-blocks p {
       font-size: clamp(0.9rem, 3vw, 1rem);
       margin: 0;
     }
@@ -418,29 +432,43 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   filteredBlocks: Block[] = [];
   recentTransactions: Transaction[] = [];
   searchHash = '';
-  limit = 10;
+  limit = 6;
   maxTransactions = 10;
   shouldAnimate = false;
   shouldAnimateTx = false;
+  isLoadingInitial = true;
   private blockchainService = inject(MockBlockchainService);
   private router = inject(Router);
-  private dialog = inject(MatDialog); // Inject MatDialog
+  private dialog = inject(MatDialog);
   private pollSubscription: Subscription | null = null;
   private isLoading = false;
 
   @ViewChild('blockchainContainer') blockchainContainer!: ElementRef;
 
+  // Drag properties
+  private isDragging = false;
+  private startX = 0;
+  private scrollLeft = 0;
+  private lastTouchTime = 0;
+  private touchTimeout: any;
+
   async ngOnInit() {
-    const blocks = await this.blockchainService.getBlocks(this.limit) ?? [];
-    this.allBlocks = blocks.sort((a, b) => b.height - a.height);
-    this.filteredBlocks = [...this.allBlocks];
-    console.log('All blocks:', this.allBlocks);
-    this.updateRecentTransactions();
+    try {
+      this.isLoadingInitial = true;
+      const blocks = await this.blockchainService.getBlocks(this.limit) ?? [];
+      this.allBlocks = blocks.sort((a, b) => b.height - a.height);
+      this.filteredBlocks = [...this.allBlocks];
+      this.updateRecentTransactions();
+    } finally {
+      this.isLoadingInitial = false;
+    }
+
     this.startPolling();
   }
 
   ngOnDestroy() {
     if (this.pollSubscription) this.pollSubscription.unsubscribe();
+    if (this.touchTimeout) clearTimeout(this.touchTimeout);
   }
 
   private startPolling() {
@@ -536,8 +564,8 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   openTransactionDialog(tx: Transaction): void {
     const containingBlock = this.filteredBlocks.find(block => block.transactions.some(t => t.transactionId === tx.transactionId));
     this.dialog.open(TransactionDetailsComponent, {
-      width: '500px', // Smaller width
-      maxHeight: '80vh', // Limit height to 80% of viewport
+      width: '500px',
+      maxHeight: '80vh',
       data: { transaction: tx, block: containingBlock || null }
     });
   }
@@ -551,7 +579,6 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
 
   navigateToFileViewer(event: Event, fileUrl: string) {
     event.stopPropagation();
-    console.log('Navigating to file viewer with URL:', fileUrl);
     const filename = decodeURIComponent(fileUrl);
     this.router.navigate(['/file-viewer'], {
       queryParams: { filename },
@@ -560,7 +587,46 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   }
 
   extractFilename(fileUrl: string): string {
-
     return fileUrl.split('/').pop() || fileUrl;
+  }
+
+  // Drag handling methods
+  startDragging(event: MouseEvent | TouchEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+    const element = this.blockchainContainer.nativeElement;
+    if (event instanceof MouseEvent) {
+      this.startX = event.pageX;
+    } else {
+      this.startX = event.touches[0].pageX;
+      this.lastTouchTime = Date.now();
+    }
+    this.scrollLeft = element.scrollLeft;
+  }
+
+  drag(event: MouseEvent | TouchEvent): void {
+    if (!this.isDragging) return;
+    event.preventDefault();
+    const element = this.blockchainContainer.nativeElement;
+    let x: number;
+    if (event instanceof MouseEvent) {
+      x = event.pageX;
+    } else {
+      x = event.touches[0].pageX;
+    }
+    const walk = (x - this.startX) * 1.5; // Adjust drag speed
+    element.scrollLeft = this.scrollLeft - walk;
+  }
+
+  stopDragging(): void {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+    const currentTime = Date.now();
+    if (currentTime - this.lastTouchTime < 200) {
+      // Consider it a tap if touch duration is short
+      this.touchTimeout = setTimeout(() => {
+        // Allow click events to propagate
+      }, 0);
+    }
   }
 }
