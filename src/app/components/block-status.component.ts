@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
     <mat-card class="status-bar">
       <div class="status-item">
         <mat-icon>height</mat-icon>
-        <span>Último Bloco: <strong>{{ latestBlockHeight || 'N/A' }}</strong></span>
+        <span>Último Bloco: <strong>{{ latestBlockHeight}}</strong></span>
       </div>
       <div class="status-item">
         <mat-icon>storage</mat-icon>

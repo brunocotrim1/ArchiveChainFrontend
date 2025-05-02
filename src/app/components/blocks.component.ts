@@ -82,7 +82,7 @@ export class BlocksComponent implements OnInit, OnDestroy {
         this.blockchainService.getLastBlockIndex()
       ]);
       this.archivedStorage = storageResponse ? parseFloat(storageResponse) : 0;
-      this.totalContracts = String(Number(contractsResponse)*4)  || '0';
+      this.totalContracts = String(Number(contractsResponse))  || '0';
       this.totalCoins = coinsResponse || '0';
       this.totalStoredFiles = filesResponse || '0';  // Assign the new value
       this.lastBlockIndex = lastBlockIndex || 0;  // Assign the last block index
