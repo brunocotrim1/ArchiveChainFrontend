@@ -267,9 +267,13 @@ export class FileViewerComponent implements OnInit {
 
         let blob = response.body;
         if (contentType.includes('html')) {
-          const htmlContent = await blob.text();
-          const modifiedHtml = await this.processHtmlContent(htmlContent);
-          blob = new Blob([modifiedHtml], { type: 'text/html' });
+          const content = await blob.arrayBuffer();
+          const decoder = new TextDecoder('utf-8');
+          const htmlContent = decoder.decode(content);
+          //console.log('HTML content:', htmlContent);
+          const modifiedHtml = await this.processHtmlContent2(htmlContent);
+          //console.log('Modified HTML content:', modifiedHtml);
+          blob = new Blob([modifiedHtml], { type: 'text/html;charset=UTF-8' });
         } else if (contentType.includes('json')) {
           const jsonContent = await blob.text();
           try {
@@ -281,7 +285,6 @@ export class FileViewerComponent implements OnInit {
         }
       
         this.blobUrl = window.URL.createObjectURL(blob);
-        console.log('Blob URL:', this.blobUrl);
         this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.blobUrl);
         this.determineDisplayType(contentType);
         if (this.isText || this.isJson) {
@@ -448,8 +451,70 @@ private isValidJson(str: string): boolean {
     }
     return contentType
   }
-  private async processHtmlContent(htmlContent: string): Promise<string> {
+  private async processHtmlContent2(htmlContent: string): Promise<string> {
     let modifiedHtml = htmlContent;
+    const imgRegex = /<img\s+([^>]*?)src=(["'])([^"']+)\2([^>]*)>/gi;
+
+    modifiedHtml = htmlContent.replace(imgRegex, (match, beforeSrc, quote, src, afterSrc) => {
+        console.log('Original src:', src);
+
+        let modifiedSrc = src;
+        if (modifiedSrc.startsWith('//arquivo.pt')) {
+            modifiedSrc = modifiedSrc.replace('//arquivo.pt', '');
+            if (modifiedSrc.startsWith('/')) {
+                modifiedSrc = modifiedSrc.substring(1);
+            }
+            modifiedSrc = `${this.baseUrl}/${modifiedSrc}`;
+        }
+
+        return `<img ${beforeSrc}src=${quote}${modifiedSrc}${quote}${afterSrc}>`;
+    });
+
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+    modifiedHtml = modifiedHtml.replace(styleRegex, (match, cssContent) => {
+        const modifiedCss = cssContent
+            .replace(/url\(['"]?\/noFrame([^'")]+)['"]?\)/gi, `url('https://archivechain.pt/noFrame$1')`)
+            .replace(/https:\/\/arquivo\.pt/gi, 'https://archivechain.pt');
+        return `<style>${modifiedCss}</style>`;
+    });
+
+    const styleAttrRegex = /style=["']([^"']*)["']/gi;
+    modifiedHtml = modifiedHtml.replace(styleAttrRegex, (match, styleContent) => {
+        const modifiedStyle = styleContent
+            .replace(/url\(['"]?\/noFrame([^'")]+)['"]?\)/gi, `url('https://archivechain.pt/noFrame$1')`)
+            .replace(/https:\/\/arquivo\.pt/gi, 'https://archivechain.pt');
+        return `style="${modifiedStyle}"`;
+    });
+    const urlAttrRegex = /(href|src)=["']([^"']+)["']/gi;
+    modifiedHtml = modifiedHtml.replace(urlAttrRegex, (match, attr, url) => {
+        let modifiedUrl = url.replace('https://arquivo.pt', 'https://archivechain.pt');
+        return `${attr}="${modifiedUrl}"`;
+    });
+
+    if (!modifiedHtml.match(/<base[^>]*>/i)) {
+        const headIndex = modifiedHtml.indexOf('<head>') + 6;
+        if (headIndex >= 6) {
+            modifiedHtml = modifiedHtml.slice(0, headIndex) + `<base href="${this.baseUrl}/">` + modifiedHtml.slice(headIndex);
+        } else {
+            modifiedHtml = `<base href="${this.baseUrl}/">` + modifiedHtml;
+        }
+    }
+    return modifiedHtml;
+  }
+  private async processHtmlContent(htmlContent: string): Promise<string> {
+    
+    let modifiedHtml = htmlContent;
+    
+    // Add meta charset tag if not present
+    if (!modifiedHtml.match(/<meta[^>]*charset=/i)) {
+        const headIndex = modifiedHtml.indexOf('<head>') + 6;
+        if (headIndex >= 6) {
+            modifiedHtml = modifiedHtml.slice(0, headIndex) + '<meta charset="utf-8">' + modifiedHtml.slice(headIndex);
+        } else {
+            modifiedHtml = '<meta charset="utf-8">' + modifiedHtml;
+        }
+    }
+
     const linkRegex = /<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi;
     modifiedHtml = await modifiedHtml.replaceAsync(linkRegex, async (match, href) => {
         try {
@@ -506,11 +571,15 @@ private isValidJson(str: string): boolean {
     const imgRegex = /<img[^>]*src=["']([^"']+)["'][^>]*>/gi;
     modifiedHtml = modifiedHtml.replace(imgRegex, (match, src) => {
         let modifiedSrc = src;
+        console.log('Original src:', src);
+
         if (!modifiedSrc.startsWith('http')) {
             modifiedSrc = modifiedSrc.startsWith('/') ? modifiedSrc.substring(1) : modifiedSrc;
             modifiedSrc = `${this.baseUrl}/${modifiedSrc}`;
         }
+    
         modifiedSrc = modifiedSrc.replace('https://arquivo.pt', 'https://archivechain.pt');
+        console.log('Modified src:', modifiedSrc);
         return match.replace(src, modifiedSrc);
     });
 

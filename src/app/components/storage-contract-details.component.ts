@@ -492,6 +492,7 @@ export class StorageContractDetailsComponent implements OnInit {
     try {
       const response = await this.blockchainService.getContractFileProvingWindows(contractHash);
       this.fileProvingWindows = response || [];
+      this.fileProvingWindows.reverse();
     } catch (error) {
       console.error('Error fetching file proving windows:', error);
       this.fileProvingWindows = [];

@@ -25,7 +25,7 @@ const routes: Routes = [
   { path: 'storageContracts', component: StorageContractsComponent },
   { path: 'storageContractDetails', component: StorageContractDetailsComponent },
   { path: 'file-viewer', component: FileViewerComponent },
-  { path: 'wallet-details/:address', component: WalletDetailsComponent }
+  { path: 'wallet-details/:address', component: WalletDetailsComponent },
 ];
 
 bootstrapApplication(AppComponent, {

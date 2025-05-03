@@ -48,6 +48,33 @@ import { RouterModule } from '@angular/router';
           Seu navegador não suporta a tag de vídeo.
         </video>
       </div>
+
+      <!-- Seção de Contribuição -->
+      <div class="contribution-section">
+        <h2>Com o apoio de:</h2>
+        <div class="logo-grid">
+        <a href="https://www.fct.pt/" target="_blank">
+          <img src="assets/images/fct_logo.png" alt="FCT Logo" class="contrib-logo">
+        </a>
+        <a href="https://www.ul.pt/" target="_blank">
+          <img src="assets/images/ul_logo.png" alt="UL Logo" class="contrib-logo">
+        </a>
+        <a href="https://www.lasige.pt/" target="_blank">
+          <img src="assets/images/lasige_logo.png" alt="LASIGE Logo" class="contrib-logo">
+        </a>
+        <a href="https://ciencias.ulisboa.pt/" target="_blank">
+          <img src="assets/images/fcul_logo.png" alt="FCUL Logo" class="contrib-logo">
+        </a>
+        <a href="https://www.inesc-id.pt/" target="_blank">
+          <img src="assets/images/inesc_logo.png" alt="INESC Logo" class="contrib-logo">
+        </a>
+        <a href="https://tecnico.ulisboa.pt/pt/" target="_blank">
+          <img src="assets/images/ist_logo.png" alt="IST Logo" class="contrib-logo">
+        </a>
+
+
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -61,13 +88,16 @@ import { RouterModule } from '@angular/router';
     }
 
     .landing-container {
-      max alt: auto;
       max-width: 1200px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 3rem;
+    }
+    .contrib-logo[alt="IST Logo"],
+    .contrib-logo[alt="INESC Logo"] {
+      transform: scale(0.8);
     }
 
     .logo-section {
@@ -86,7 +116,7 @@ import { RouterModule } from '@angular/router';
 
     .description-section h1 {
       font-size: clamp(1.5rem, 5vw, 2.5rem);
-      color:rgb(77, 102, 91);
+      color: rgb(77, 102, 91);
       margin-bottom: 1rem;
     }
 
@@ -120,7 +150,7 @@ import { RouterModule } from '@angular/router';
 
     .option-column h2 {
       font-size: clamp(1.2rem, 4vw, 1.5rem);
-      color:rgb(77, 102, 91);
+      color: rgb(77, 102, 91);
       margin-bottom: 1rem;
     }
 
@@ -180,6 +210,32 @@ import { RouterModule } from '@angular/router';
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
+    .contribution-section {
+      text-align: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .contribution-section h2 {
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      color: rgb(77, 102, 91);
+      margin-bottom: 1.5rem;
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1.5rem;
+      justify-items: center;
+      align-items: center;
+    }
+
+    .contrib-logo {
+      max-width: 160px;
+      height: 100px;
+      object-fit: contain;
+    }
+
     @media (max-width: 768px) {
       :host {
         padding: 1rem;
@@ -196,6 +252,15 @@ import { RouterModule } from '@angular/router';
 
       .presentation-video {
         max-width: 100%;
+      }
+
+      .logo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 1rem;
+      }
+
+      .contrib-logo {
+        max-width: 100px;
       }
     }
 
@@ -224,9 +289,22 @@ import { RouterModule } from '@angular/router';
         font-size: clamp(1rem, 3.5vw, 1.2rem);
       }
 
+      .contribution-section h2 {
+        font-size: clamp(1rem, 3.5vw, 1.2rem);
+      }
+
       .github-logo, .magnifying-glass {
         width: 20px;
         height: 20px;
+      }
+
+      .logo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.8rem;
+      }
+
+      .contrib-logo {
+        max-width: 80px;
       }
     }
   `]
