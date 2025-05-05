@@ -37,6 +37,12 @@ import { RouterModule } from '@angular/router';
           <a mat-raised-button color="accent" href="https://github.com/brunocotrim1/ArchiveChain" target="_blank">
             <img src="assets/images/github-logo.png" alt="GitHub Logo" class="github-logo"> Participe no GitHub
           </a>
+          <a mat-raised-button color="accent" href="https://github.com/brunocotrim1/ArchiveChain/releases/tag/ArchiveChain-1.0_windows" target="_blank" class="download-button">
+            <img src="assets/images/windows_logo.png" alt="Linux Icon" class="linux-icon"> Download Windows
+          </a>
+          <a mat-raised-button color="accent" href="https://github.com/brunocotrim1/ArchiveChain/releases/tag/ArchiveChain-1.0_linux" target="_blank" class="download-button">
+            <img src="assets/images/linux_logo.png" alt="Linux Icon" class="linux-icon">  Download Linux
+          </a>
         </div>
       </div>
 
@@ -71,8 +77,6 @@ import { RouterModule } from '@angular/router';
         <a href="https://tecnico.ulisboa.pt/pt/" target="_blank">
           <img src="assets/images/ist_logo.png" alt="IST Logo" class="contrib-logo">
         </a>
-
-
         </div>
       </div>
     </div>
@@ -95,6 +99,7 @@ import { RouterModule } from '@angular/router';
       align-items: center;
       gap: 3rem;
     }
+
     .contrib-logo[alt="IST Logo"],
     .contrib-logo[alt="INESC Logo"] {
       transform: scale(0.8);
@@ -142,6 +147,9 @@ import { RouterModule } from '@angular/router';
       text-align: center;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .option-column:hover {
@@ -184,11 +192,15 @@ import { RouterModule } from '@angular/router';
       background-color: #6B7280;
     }
 
-    .github-logo, .magnifying-glass {
+    .github-logo, .magnifying-glass, .linux-icon {
       width: 24px;
       height: 24px;
       vertical-align: middle;
       margin-right: 0.5rem;
+    }
+
+    .download-button {
+      margin-top: 0.5rem;
     }
 
     .video-section {
@@ -293,7 +305,7 @@ import { RouterModule } from '@angular/router';
         font-size: clamp(1rem, 3.5vw, 1.2rem);
       }
 
-      .github-logo, .magnifying-glass {
+      .github-logo, .magnifying-glass, .linux-icon {
         width: 20px;
         height: 20px;
       }
