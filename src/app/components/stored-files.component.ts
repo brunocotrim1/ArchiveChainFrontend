@@ -479,7 +479,7 @@ export class StoredFilesComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.currentPage = parseInt(params['page']) || 1;
       this.pageSize = parseInt(params['pageSize']) || 10;
-      this.searchTerm = params['fileName'] || ''; // Set searchTerm from URL
+      this.searchTerm = params['fileName'] || 'Filho do 25 de Abril'; // Set searchTerm from URL
       this.loadFiles();
     });
   }

@@ -20,6 +20,9 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   selector: 'app-file-viewer',
   template: `
     <mat-card class="viewer-card">
+    <div  class="loading-message">
+        Se a página aparecer em branco, está a ser carregada, por favor aguarde!
+      </div>
       <div class="back-button-container">
         <button mat-raised-button class="back-btn" (click)="goBack()">
           <mat-icon>arrow_back</mat-icon> Back
@@ -161,6 +164,14 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     }
     mat-card-header {
       padding: 0.5rem 1rem;
+    }
+    .loading-message {
+      background-color: #f8f9fa;
+      color: #4A4A4A;
+      text-align: center;
+      padding: 0.75rem;
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      border-bottom: 1px solid #E2E8F0;
     }
     mat-card-title {
       display: flex;

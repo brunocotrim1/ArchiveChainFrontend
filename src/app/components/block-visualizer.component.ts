@@ -59,8 +59,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
             </div>
             <div class="blockchain-chain" *ngIf="!isLoadingInitial" [@pushAnimation]="filteredBlocks.length" [@.disabled]="!shouldAnimate">
               <div *ngFor="let block of filteredBlocks; let i = index" class="block-wrapper">
-                <div class="block-cube" [routerLink]="['/blocks', block.height]" (click)="onBlockClick(block)"
-                     [matTooltip]="'Block ' + block.height + '\nHash: ' + block.hash + '\nFile: ' + block.posProof.winningFilename">
+                <div class="block-cube" [routerLink]="['/blocks', block.height]" (click)="onBlockClick(block)">
                   <div class="cube-face cube-front">
                     <h3 class="block-height">{{ block.height }}</h3>
                     <p class="block-hash">{{ block.hash | slice:0:10 }}...</p>
