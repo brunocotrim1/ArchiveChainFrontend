@@ -4,6 +4,8 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { FooterComponent } from './components/footer.component';
 import { PersonalPhotoComponent } from './components/personal-photo.component'; // Adjust path if needed
 import { filter } from 'rxjs';
+import { TranslationService } from './services/translation.service';
+import { AutoTranslateDirective } from './directives/auto-translate.directive';
 
 @Component({
   selector: 'app-root',
@@ -13,29 +15,50 @@ import { filter } from 'rxjs';
     RouterOutlet,
     RouterLink,
     FooterComponent,
-    PersonalPhotoComponent // Add the new component
+    PersonalPhotoComponent, // Add the new component
+    AutoTranslateDirective
   ],
   template: `
-    <div class="app-container">
-      <header class="toolbar">
-        <a [routerLink]="['/landing']" class="title-link">
-          <img src="/assets/images/logo.png" alt="ArchiveChain Explorer" class="title-image">
-        </a>
-        <nav class="nav-buttons">
-          <a [routerLink]="['/landing']" class="nav-btn">Página Inicial</a>
-          <a [routerLink]="['/blocks']" class="nav-btn">Estado da Blockchain</a>
-          <a [routerLink]="['/wallets']" class="nav-btn">Saldos das carteiras</a>
-          <a [routerLink]="['/storedFiles']" class="nav-btn">Páginas Armazenadas</a>
-          <a [routerLink]="['/storageContracts']" class="nav-btn">Contratos de armazenamento</a>
-        </nav>
-      </header>
+    <div class="app-shell" appAutoTranslate>
+      <div class="app-container">
+        <header class="toolbar">
+          <a [routerLink]="['/landing']" class="title-link">
+            <img src="/assets/images/logo.png" alt="ArchiveChain Explorer" class="title-image">
+          </a>
+          <nav class="nav-buttons">
+            <a [routerLink]="['/landing']" class="nav-btn">{{ translationService.t('home') }}</a>
+            <a [routerLink]="['/blocks']" class="nav-btn">{{ translationService.t('blockchainStatus') }}</a>
+            <a [routerLink]="['/wallets']" class="nav-btn">{{ translationService.t('walletBalances') }}</a>
+            <a [routerLink]="['/storedFiles']" class="nav-btn">{{ translationService.t('storedPages') }}</a>
+            <a [routerLink]="['/storageContracts']" class="nav-btn">{{ translationService.t('storageContracts') }}</a>
+            <div class="lang-switch" [attr.aria-label]="translationService.t('switchLanguageAria')">
+              <span
+                class="lang-option"
+                [class.active]="translationService.currentLanguage === 'en'"
+                (click)="translationService.setLanguage('en')"
+              >
+                EN
+              </span>
+              <span class="lang-separator">|</span>
+              <span
+                class="lang-option"
+                [class.active]="translationService.currentLanguage === 'pt'"
+                (click)="translationService.setLanguage('pt')"
+              >
+                PT
+              </span>
+            </div>
+          </nav>
+        </header>
 
-      <main class="content">
-        <router-outlet></router-outlet>
-      </main>
+        <main class="content">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
+
+      <!--<app-personal-photo></app-personal-photo>Add photo component here -->
+      <app-footer></app-footer>
     </div>
-    <!--<app-personal-photo></app-personal-photo>Add photo component here -->
-    <app-footer></app-footer>
   `,
   styles: [`
     :host {
@@ -103,6 +126,35 @@ import { filter } from 'rxjs';
       transform: translateY(0);
     }
 
+    .lang-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #4B5E54;
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-family: 'Roboto', sans-serif;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .lang-option {
+      cursor: pointer;
+      transition: opacity 0.2s ease, text-decoration-color 0.2s ease;
+      opacity: 0.55;
+    }
+
+    .lang-option:hover,
+    .lang-option.active {
+      opacity: 1;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .lang-separator {
+      opacity: 0.7;
+    }
+
     .content {
       padding: 1.5rem;
       max-width: 90%;
@@ -125,6 +177,10 @@ import { filter } from 'rxjs';
       .nav-btn {
         padding: 0.45rem 1rem;
         font-size: 0.85rem;
+      }
+
+      .lang-switch {
+        font-size: 0.8rem;
       }
 
       .nav-buttons {
@@ -167,7 +223,10 @@ import { filter } from 'rxjs';
   `]
 })
 export class AppComponent implements OnInit {
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    public translationService: TranslationService
+  ) {}
 
   ngOnInit() {
     // Subscribe to Router events to listen for navigation end

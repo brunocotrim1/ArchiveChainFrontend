@@ -246,3 +246,37 @@ sudo systemctl restart nginx
 sudo certbot renew --dry-run
 ```
 
+
+
+sudo cp -r /home/archain/ArchiveChainFrontend/dist/archive-mint-frontend/browser/* /var/www/archivechain.pt/html
+sudo chown -R nginx:nginx /var/www/archivechain.pt/html
+sudo find /var/www/archivechain.pt/html -type d -exec chmod 755 {} \;
+sudo find /var/www/archivechain.pt/html -type f -exec chmod 644 {} \;
+
+server {
+    listen 443 ssl;
+    server_name archivechain.pt;
+
+    ssl_certificate /etc/letsencrypt/live/archivechain.pt/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/archivechain.pt/privkey.pem;
+
+    root /var/www/archivechain.pt/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /storage/ {
+        proxy_pass http://localhost:8085;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /opt/homebrew/var/www/certbot;
+    }
+}

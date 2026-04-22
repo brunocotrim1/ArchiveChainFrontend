@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
+import { TranslationService } from '../services/translation.service';
 import { FormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -39,7 +40,7 @@ import { MatSelectModule } from '@angular/material/select';
           </div>
         </div>
         <ng-template #noStorers>
-          <p class="no-storers">No storers found for this file.</p>
+          <p class="no-storers">{{ translationService.translateText('No storers found for this file.') }}</p>
         </ng-template>
       </mat-dialog-content>
       <mat-dialog-actions class="dialog-actions">
@@ -197,7 +198,8 @@ export class StorersDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: { title: string, storers: string[], fileUrl: string },
     private router: Router,
     private blockchainService: MockBlockchainService,
-    private dialogRef: MatDialogRef<StorersDialogComponent>
+    private dialogRef: MatDialogRef<StorersDialogComponent>,
+    public translationService: TranslationService
   ) {}
 
   navigateToWallet(storer: string) {
@@ -253,7 +255,7 @@ export class StorersDialogComponent {
               <input matInput 
                      [(ngModel)]="searchTerm" 
                      (keydown.enter)="onSearchEnter()"
-                     placeholder="Enter file name and press Enter...">
+                     [placeholder]="translationService.translateText('Enter file name and press Enter...')">
             </mat-form-field>
           </div>
           <div *ngIf="filteredFiles.length > 0; else noFilesFound">
@@ -304,7 +306,7 @@ export class StorersDialogComponent {
             </div>
           </div>
           <ng-template #noFilesFound>
-            <p class="no-files">No stored files found.</p>
+            <p class="no-files">{{ translationService.translateText('No stored files found.') }}</p>
           </ng-template>
         </mat-card-content>
       </mat-card>
@@ -466,6 +468,7 @@ export class StoredFilesComponent implements OnInit {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private route = inject(ActivatedRoute);
+  translationService = inject(TranslationService);
 
   // Pagination properties
   currentPage: number = 1;

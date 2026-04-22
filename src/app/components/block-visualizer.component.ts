@@ -10,6 +10,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
+import { TranslationService } from '../services/translation.service';
 import { TransactionDetailsComponent } from './transaction-details.component';
 import { Block, Transaction } from '../models/interface';
 import { interval, Subscription } from 'rxjs';
@@ -39,7 +40,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
       <mat-card-content class="content-wrapper">
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Search by Hash</mat-label>
-          <input matInput [(ngModel)]="searchHash" (ngModelChange)="filterBlocks()" placeholder="Enter block hash">
+          <input matInput [(ngModel)]="searchHash" (ngModelChange)="filterBlocks()" [placeholder]="translationService.translateText('Enter block hash')">
           <mat-icon matSuffix class="search-icon">search</mat-icon>
         </mat-form-field>
 
@@ -88,7 +89,7 @@ import { trigger, style, transition, animate, query, stagger } from '@angular/an
             </div>
             <div class="no-blocks" *ngIf="!isLoadingInitial && filteredBlocks.length === 0">
               <mat-icon>info</mat-icon>
-              <p>No blocks found.</p>
+              <p>{{ translationService.translateText('No blocks found.') }}</p>
             </div>
           </div>
 
@@ -431,7 +432,7 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   filteredBlocks: Block[] = [];
   recentTransactions: Transaction[] = [];
   searchHash = '';
-  limit = 6;
+  limit = 3;
   maxTransactions = 10;
   shouldAnimate = false;
   shouldAnimateTx = false;
@@ -439,6 +440,7 @@ export class BlockVisualizerComponent implements OnInit, OnDestroy {
   private blockchainService = inject(MockBlockchainService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
+  translationService = inject(TranslationService);
   private pollSubscription: Subscription | null = null;
   private isLoading = false;
 

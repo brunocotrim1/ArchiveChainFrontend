@@ -1,11 +1,13 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgChartsModule } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { MockBlockchainService } from '../services/blockchain.service';
+import { TranslationService } from '../services/translation.service';
 import Chart from 'chart.js/auto';
 import zoomPlugin from 'chartjs-plugin-zoom';
+import { Subscription } from 'rxjs';
 
 Chart.register(zoomPlugin);
 
@@ -20,27 +22,27 @@ Chart.register(zoomPlugin);
   template: `
     <div class="chart-card">
       <div class="header">
-        <h2 class="title">Métricas da evolução da Blockchain</h2>
-        <p class="subtitle">Tendências cumulativas para armazenamento, arquivos e moedas</p>
+        <h2 class="title">{{ translationService.translateText('Metricas da evolucao da Blockchain') }}</h2>
+        <p class="subtitle">{{ translationService.translateText('Tendencias cumulativas para armazenamento, arquivos e moedas') }}</p>
       </div>
       <div class="content">
         <div class="controls">
-          <label for="intervalValue">Intervalo de Tempo:</label>
-          <input id="intervalValue" type="number" [(ngModel)]="intervalValue" min="1" step="1" placeholder="e.g., 5">
+          <label for="intervalValue">{{ translationService.translateText('Intervalo de Tempo:') }}</label>
+          <input id="intervalValue" type="number" [(ngModel)]="intervalValue" min="1" step="1" [placeholder]="translationService.translateText('ex., 5')">
           
-          <label for="timescale">Timescale:</label>
+          <label for="timescale">{{ translationService.translateText('Timescale:') }}</label>
           <select id="timescale" [(ngModel)]="selectedTimescale" (change)="processInterval()">
             <option *ngFor="let scale of timescales" [value]="scale.value">
-              {{ scale.label }}
+              {{ translationService.translateText(scale.label) }}
             </option>
           </select>
           
-          <button (click)="processInterval()">Processar</button>
+          <button (click)="processInterval()">{{ translationService.translateText('Processar') }}</button>
         </div>
 
         <!-- Cumulative Storage Used Chart -->
         <div class="chart-section">
-          <h3 class="chart-title">Armazenamento acumulativo utilizado</h3>
+          <h3 class="chart-title">{{ translationService.translateText('Armazenamento acumulativo utilizado') }}</h3>
           <div class="chart-container">
             <canvas baseChart [data]="storageChartData" [options]="storageChartOptions" [type]="barChartType"></canvas>
           </div>
@@ -48,7 +50,7 @@ Chart.register(zoomPlugin);
 
         <!-- Cumulative File Count Chart -->
         <div class="chart-section">
-          <h3 class="chart-title">Número de arquivos acumulativo</h3>
+          <h3 class="chart-title">{{ translationService.translateText('Numero de arquivos acumulativo') }}</h3>
           <div class="chart-container">
             <canvas baseChart [data]="fileChartData" [options]="fileChartOptions" [type]="barChartType"></canvas>
           </div>
@@ -56,7 +58,7 @@ Chart.register(zoomPlugin);
 
         <!-- Cumulative Mined Coins Chart -->
         <div class="chart-section">
-          <h3 class="chart-title">Número de Moedas geradas acumulativo</h3>
+          <h3 class="chart-title">{{ translationService.translateText('Numero de Moedas geradas acumulativo') }}</h3>
           <div class="chart-container">
             <canvas baseChart [data]="coinsChartData" [options]="coinsChartOptions" [type]="barChartType"></canvas>
           </div>
@@ -207,9 +209,11 @@ Chart.register(zoomPlugin);
     }
   `]
 })
-export class BlockChartComponent implements OnInit {
+export class BlockChartComponent implements OnInit, OnDestroy {
   private blockchainService = inject(MockBlockchainService);
   private cdr = inject(ChangeDetectorRef);
+  translationService = inject(TranslationService);
+  private languageSubscription?: Subscription;
 
   // Interval controls
   intervalValue: number = 5;
@@ -228,27 +232,14 @@ export class BlockChartComponent implements OnInit {
     datasets: [
       {
         data: [],
-        label: 'Armazenamento acumulativo utilizado',
+        label: '',
         backgroundColor: '#63B3ED',
         borderColor: '#63B3ED',
         borderWidth: 1
       }
     ]
   };
-  storageChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: { title: { display: true, text: 'Tempo', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Armazenamento (GB)', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} GB` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
-    },
-    plugins: {
-      legend: { labels: { color: '#4A4A4A' }, position: 'top' },
-      tooltip: { backgroundColor: 'rgba(99, 179, 237, 0.9)', titleColor: '#FFFFFF', bodyColor: '#FFFFFF', borderColor: '#63B3ED', borderWidth: 1, cornerRadius: 4, padding: 8 },
-      zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }, pan: { enabled: true, mode: 'x' } }
-    },
-    animation: { duration: 1000, easing: 'easeInOutQuad' }
-  };
+  storageChartOptions: ChartConfiguration['options'] = {};
 
   // File Chart
   fileData: { timestamp: string; amount: number }[] = [];
@@ -257,27 +248,14 @@ export class BlockChartComponent implements OnInit {
     datasets: [
       {
         data: [],
-        label: 'Número de arquivos acumulativo',
+        label: '',
         backgroundColor: '#90CDF4',
         borderColor: '#90CDF4',
         borderWidth: 1
       }
     ]
   };
-  fileChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: { title: { display: true, text: 'Tempo', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Ficheiros', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value}M Files` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
-    },
-    plugins: {
-      legend: { labels: { color: '#4A4A4A' }, position: 'top' },
-      tooltip: { backgroundColor: 'rgba(144, 205, 244, 0.9)', titleColor: '#FFFFFF', bodyColor: '#FFFFFF', borderColor: '#90CDF4', borderWidth: 1, cornerRadius: 4, padding: 8 },
-      zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }, pan: { enabled: true, mode: 'x' } }
-    },
-    animation: { duration: 1000, easing: 'easeInOutQuad' }
-  };
+  fileChartOptions: ChartConfiguration['options'] = {};
 
   // Coins Chart
   coinsData: { timestamp: string; amount: number }[] = [];
@@ -286,33 +264,86 @@ export class BlockChartComponent implements OnInit {
     datasets: [
       {
         data: [],
-        label: 'Número de Moedas geradas acumulativo',
+        label: '',
         backgroundColor: '#BEE3F8',
         borderColor: '#BEE3F8',
         borderWidth: 1
       }
     ]
   };
-  coinsChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: { title: { display: true, text: 'Tempo', color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-      y: { title: { display: true, text: 'Moedas', color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} Coins` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
-    },
-    plugins: {
-      legend: { labels: { color: '#4A4A4A' }, position: 'top' },
-      tooltip: { backgroundColor: 'rgba(190, 227, 248, 0.9)', titleColor: '#FFFFFF', bodyColor: '#FFFFFF', borderColor: '#BEE3F8', borderWidth: 1, cornerRadius: 4, padding: 8 },
-      zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }, pan: { enabled: true, mode: 'x' } }
-    },
-    animation: { duration: 1000, easing: 'easeInOutQuad' }
-  };
+  coinsChartOptions: ChartConfiguration['options'] = {};
 
   barChartType: ChartType = 'bar';
 
   async ngOnInit() {
+    this.updateChartOptions();
+    this.languageSubscription = this.translationService.languageChanges.subscribe(() => {
+      this.updateChartOptions();
+      this.cdr.detectChanges();
+    });
     await this.fetchAllData();
     this.processInterval();
+  }
+
+  ngOnDestroy() {
+    this.languageSubscription?.unsubscribe();
+  }
+
+  private updateChartOptions() {
+    const mFilesLabel = this.translationService.translateText('M Ficheiros');
+    const coinsLabel = this.translationService.translateText('Coins');
+    const timeLabel = this.translationService.translateText('Tempo');
+    const storageLabel = this.translationService.translateText('Armazenamento (GB)');
+    const filesLabel = this.translationService.translateText('Ficheiros');
+    const coinsYLabel = this.translationService.translateText('Moedas');
+
+    this.storageChartData.datasets[0].label = this.translationService.translateText('Armazenamento acumulativo utilizado');
+    this.storageChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: timeLabel, color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+        y: { title: { display: true, text: storageLabel, color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} GB` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      },
+      plugins: {
+        legend: { labels: { color: '#4A4A4A' }, position: 'top' },
+        tooltip: { backgroundColor: 'rgba(99, 179, 237, 0.9)', titleColor: '#FFFFFF', bodyColor: '#FFFFFF', borderColor: '#63B3ED', borderWidth: 1, cornerRadius: 4, padding: 8 },
+        zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }, pan: { enabled: true, mode: 'x' } }
+      },
+      animation: { duration: 1000, easing: 'easeInOutQuad' }
+    };
+
+    this.fileChartData.datasets[0].label = this.translationService.translateText('Numero de arquivos acumulativo');
+    this.fileChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: timeLabel, color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+        y: { title: { display: true, text: filesLabel, color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value}${mFilesLabel}` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      },
+      plugins: {
+        legend: { labels: { color: '#4A4A4A' }, position: 'top' },
+        tooltip: { backgroundColor: 'rgba(144, 205, 244, 0.9)', titleColor: '#FFFFFF', bodyColor: '#FFFFFF', borderColor: '#90CDF4', borderWidth: 1, cornerRadius: 4, padding: 8 },
+        zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }, pan: { enabled: true, mode: 'x' } }
+      },
+      animation: { duration: 1000, easing: 'easeInOutQuad' }
+    };
+
+    this.coinsChartData.datasets[0].label = this.translationService.translateText('Numero de Moedas geradas acumulativo');
+    this.coinsChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: timeLabel, color: '#4A4A4A' }, ticks: { color: '#6B7280', maxRotation: 45, autoSkip: true, maxTicksLimit: 6 }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+        y: { title: { display: true, text: coinsYLabel, color: '#4A4A4A' }, ticks: { color: '#6B7280', callback: (value) => `${value} ${coinsLabel}` }, grid: { color: 'rgba(0, 0, 0, 0.05)' } }
+      },
+      plugins: {
+        legend: { labels: { color: '#4A4A4A' }, position: 'top' },
+        tooltip: { backgroundColor: 'rgba(190, 227, 248, 0.9)', titleColor: '#FFFFFF', bodyColor: '#FFFFFF', borderColor: '#BEE3F8', borderWidth: 1, cornerRadius: 4, padding: 8 },
+        zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }, pan: { enabled: true, mode: 'x' } }
+      },
+      animation: { duration: 1000, easing: 'easeInOutQuad' }
+    };
   }
 
   async fetchAllData() {

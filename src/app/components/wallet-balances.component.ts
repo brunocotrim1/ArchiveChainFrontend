@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MockBlockchainService } from '../services/blockchain.service';
 import { WalletBalance } from '../models/interface';
+import { TranslationService } from '../services/translation.service';
 
 @Component({
   standalone: true,
@@ -46,7 +47,7 @@ import { WalletBalance } from '../models/interface';
                       <button mat-icon-button 
                               class="details-btn"
                               [routerLink]="['/wallet-details', participant.walletAddress]"
-                              [matTooltip]="'View Participant Details'"
+                         [matTooltip]="translationService.translateText('View Participant Details')"
                               (click)="navigateToParticipantDetails(participant.walletAddress)">
                         <mat-icon>search</mat-icon>
                       </button>
@@ -312,6 +313,7 @@ import { WalletBalance } from '../models/interface';
   `]
 })
 export class WalletBalancesComponent implements OnInit {
+  protected readonly translationService = inject(TranslationService);
   mockBalances: WalletBalance[] = [];
   private blockchainService = inject(MockBlockchainService);
   private router = inject(Router);
